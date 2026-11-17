@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1254 1254">
+<rect width="1254" height="1254" rx="250" fill="#007AAD"/>
+<path fill="#FFFFFF" d="M302 241H588C713 241 791 320 769 439C742 599 603 726 420 726H185ZM804 449H906C1047 449 1119 534 1089 648C1058 772 951 850 818 850H634L587 1013H409L478 761C548 751 606 732 656 704H885C915 704 938 682 947 654C958 618 939 592 901 592H759Z"/>
+<defs><clipPath id="ball"><circle cx="495" cy="471" r="136"/></clipPath></defs>
+<circle cx="495" cy="471" r="136" fill="#F7941D"/>
+<g clip-path="url(#ball)" stroke="#0C1D32" stroke-width="13" fill="none"><path d="M495 335V607M359 471H631M392 367C484 420 484 522 392 575M598 367C506 420 506 522 598 575"/></g>
+</svg>
