@@ -104,7 +104,10 @@ var drawBoardBase=board;board=function(){drawBoardBase();let e=step().elements.f
 fitFrame();
 
 setTool('select');render();
-</script><script>if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('Sin modo offline',e))})}</script></html>
-
-
-
+</script><script>
+if('serviceWorker' in navigator){
+const previouslyControlled=!!navigator.serviceWorker.controller;let reloading=false;
+navigator.serviceWorker.addEventListener('controllerchange',()=>{if(previouslyControlled&&!reloading){reloading=true;if(typeof save==='function')save();location.reload()}});
+window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(reg=>{reg.update().catch(()=>{});window.addEventListener('focus',()=>reg.update().catch(()=>{}))}).catch(e=>console.warn('Sin modo offline',e))});
+}
+</script></html>
