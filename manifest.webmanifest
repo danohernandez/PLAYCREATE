@@ -6,17 +6,17 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#080f18",
-  "theme_color": "#0066ff",
+  "background_color": "#FFFBFC",
+  "theme_color": "#007AAD",
   "icons": [
     {
-      "src": "./icon-192-basket.png",
+      "src": "./icon-192-palette.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "./icon-512-basket.png",
+      "src": "./icon-512-palette.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
