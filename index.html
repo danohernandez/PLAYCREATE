@@ -249,6 +249,29 @@ body:not(.light) .library .row.has-row-color.export-selected{outline-color:#FFFF
 .library .tree-new-folder{background:#007aad12;color:#007AAD}
 .library .tree-new-folder .folder-icon{width:19px;height:19px;flex:0 0 19px}
 .library .tree-new-folder .inline-play-name{flex:1;min-width:0}
+
+/* Muted row tints retain readable names and clear selection outlines. */
+body:not(.light) .library .row.has-row-color{--row-bg:var(--row-bg-dark)!important;--row-fg:#FFFBFC!important}
+.library .row.has-row-color.export-selected{outline-color:#007AAD}
+body:not(.light) .library .row.has-row-color.export-selected{outline-color:#89BFD4}
+.library .tree-item-icon{display:flex;align-items:center;justify-content:center;flex:0 0 23px;width:23px;height:25px;color:inherit}
+.library .tree-menu>div{min-width:180px}
+.library-color-popup{position:absolute;width:332px;box-sizing:border-box;z-index:100;background:#FFFBFC;color:#0C1D32;border:1px solid #B7C5CF;border-radius:6px;padding:14px;box-shadow:0 5px 20px #0C1D3226;font:15px 'Segoe UI',Arial,sans-serif}
+.library-color-popup header{display:flex;align-items:center;justify-content:space-between;font-size:17px}
+.library-color-popup header button{border:0;background:transparent;color:inherit;width:28px;height:28px;font-size:23px;padding:0}
+.palette-item-name{white-space:nowrap;text-overflow:ellipsis;overflow:hidden;margin:0 0 8px;font-size:13px;color:#546675}
+.palette-caption{margin:10px 0 6px;font-size:13px;font-weight:600}
+.library-color-grid{display:grid;grid-template-columns:repeat(10,24px);gap:5px}
+.library-color-swatch{width:24px;height:24px;min-width:24px;padding:0;border:1px solid #0C1D3233;border-radius:0}
+.library-color-swatch:hover,.library-color-swatch:focus-visible{outline:2px solid #007AAD;outline-offset:1px}
+.library-color-swatch.chosen{box-shadow:inset 0 0 0 2px #FFFBFC;outline:2px solid #007AAD}
+.palette-custom{display:flex;align-items:center;gap:6px;font-size:12px;margin-top:14px}
+.palette-custom input{min-width:0;flex:1;width:85px;font:13px 'Segoe UI',Arial,sans-serif;padding:4px;background:#FFFFFF;color:#0C1D32;border:1px solid #B7C5CF;border-radius:3px}
+.palette-custom button{font:13px 'Segoe UI',Arial,sans-serif;padding:4px 6px;background:#007AAD;color:#FFFFFF;border:1px solid #007AAD}
+.palette-error{color:#AF243E;font-size:12px;min-height:0;margin:5px 0}
+.library-color-popup small{display:block;font-size:12px;color:#546675;margin-top:8px}
+body:not(.light) .library-color-popup{background:#142738;color:#FFFBFC;border-color:#607589}
+body:not(.light) .palette-item-name,body:not(.light) .library-color-popup small{color:#BDCBD6}
 </style><div id="app-frame"><header class="top"><div class="brand"><img src="/PLAYCREATE/icon-192-flat.png" width="46" height="46" style="border-radius:10px" alt="Logo Design Play">DESIGN PLAY</div><h1 id="title" class="work-title" aria-label="Jugada o drill actual" aria-live="polite"></h1><span id="save">Guardado</span><button class="head-action undo" onclick="undo()" title="Deshacer">↶</button><button class="head-action redo" onclick="redo()" title="Rehacer">↷</button><button class="head-action theme" onclick="theme()" title="Tema claro u oscuro">☀</button><button class="primary export-button" onclick="exportDialog()">⇧ Exportar PDF</button></header><div class="layout"><aside><h3 class="library-title">BIBLIOTECA</h3><input id="search" placeholder="⌕   Buscar jugadas..." oninput="library()"><button class="new-play create-folder-text" onclick="addFolder()">+ Crear carpeta</button><div class="library" id="library" role="tree" aria-multiselectable="true" aria-label="Carpetas y jugadas"></div><div class="utility"><button onclick="backup()">Respaldo</button><button onclick="$('file').click()">Importar</button></div><span id="count" hidden></span><input hidden id="file" type="file" accept=".json"></aside><main><div class="tools" id="tools" aria-label="Herramientas de dibujo"></div><div class="toolbar"><button id="half" onclick="setCourt(false)">⚿　Media cancha</button><button id="full" onclick="setCourt(true)">⚿　Cancha completa</button><select hidden id="lineShape"><option value="straight">Recta</option></select><span hidden id="zoomValue">100 %</span></div><div class="drawing-tip" id="drawingTip">Elige una acción y arrastra. Para curvar, mueve el punto celeste. Balón: toca al jugador que lo tiene.</div><div class="court-space"><div class="board"><svg id="court" xmlns="http://www.w3.org/2000/svg"></svg></div></div><section class="sequence-column" aria-label="Secuencias de la jugada"><h3 class="sequence-title">SECUENCIA</h3><div id="steps" class="strip"></div></section><textarea id="notes" class="notes" placeholder="Notas de este paso…"></textarea></main><aside hidden><h3 class="properties-title">PROPIEDADES</h3><div class="props"><label>Color:<span class="palette"><input type="color" id="color" value="#0066ff"><button class="swatch" style="background:#0050d7" onclick="chooseColor('#0050d7')"></button><button class="swatch" style="background:#71aff5" onclick="chooseColor('#71aff5')"></button><button class="swatch" style="background:#b5d9fc" onclick="chooseColor('#b5d9fc')"></button><button class="swatch" style="background:#fff" onclick="chooseColor('#ffffff')"></button></span></label><label>Tamaño:<input id="size" type="range" min="12" max="32" value="26"></label><label>Número:<input id="number" value="1" aria-label="Número o texto"></label><div><label>Grosor de línea:<input hidden id="width" type="range" min="2" max="8" value="4"></label><div class="width-buttons"><button onclick="chooseWidth(2)">―</button><button onclick="chooseWidth(4)">━</button><button onclick="chooseWidth(7)">▬</button></div></div></div><div class="element-more"><button onclick="applyTeam('player')">Color ataque</button><button onclick="applyTeam('defender')">Color defensa</button><button onclick="duplicateElement()">Duplicar ficha</button><button onclick="straightenLine()" title="Selecciona una línea y arrastra el círculo central para curvarla">Enderezar línea</button><button onclick="duplicateStep()">Duplicar paso</button><button onclick="renameStep()">Renombrar paso</button><button onclick="deleteStep()">Eliminar paso</button></div><span id="hint" hidden></span></aside></div><footer class="bottom"><strong id="stepStatus"></strong><span><kbd>← →</kbd>Cambiar paso</span><span title="Ctrl + C copia el paso actual; Ctrl + V agrega la copia"><kbd>Ctrl + C / V</kbd>Copiar / Pegar paso</span><span><kbd>Supr</kbd>Borrar selección</span><span><kbd>Ctrl + Z</kbd>Deshacer</span><span><kbd>Ctrl + Y</kbd>Rehacer</span><span><kbd>Ctrl + E</kbd>Exportar</span></footer><div id="export" class="export-pop" hidden><button class="close-pop" onclick="$('export').hidden=true">×</button><h2>♧ Exportar selección</h2><small style="font-size:12px">Carpetas y jugadas seleccionadas</small><p id="exportInfo"></p><p>Exporta en un único PDF una o varias carpetas completas o jugadas individuales.</p><hr><label><input type="checkbox" checked disabled>Incluir todos los pasos</label><select id="perpage"><option value="1">1 paso por página</option><option value="2">2 pasos por página</option></select><button class="primary" onclick="printPDF()">⇧ Generar PDF</button></div></div><script>
 function closeDrawers(){document.querySelector('.layout').classList.remove('library-open','tools-open')}function toggleDrawer(name){let el=document.querySelector('.layout'),open=el.classList.contains(name+'-open');closeDrawers();if(!open)el.classList.add(name+'-open')}
 const $=id=>document.getElementById(id), uid=()=>crypto.randomUUID(), clone=x=>JSON.parse(JSON.stringify(x)), esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -352,6 +375,10 @@ $('court').onpointercancel=()=>{if(drag?.mode==='lineStart')lineDraft=null;drag=
 
 $('library').onclick=ev=>{
  let el=ev.target.closest('button,[data-play],[data-fname]');if(!el)return;let d=el.dataset;
+ if(d.colorfolder){openLibraryPalette('folder',d.colorfolder,el);return}
+ if(d.colorplay){openLibraryPalette('play',d.colorplay,el);return}
+ if(d.pname){beginInlineRename('play',d.pname);return}
+
  if(d.addsequence){libraryFolder=d.addsequence;collapsedFolders.delete(d.addsequence);addPlay(d.addsequence);return}
  if(d.subfolder){addFolder(d.subfolder);return}
  if(d.play){closeDrawers();pid=d.play;libraryFolder=play().folder;sid=play().steps[0].id;focus=null;render();return}
@@ -453,11 +480,8 @@ function libraryFolderDraftRow(depth){
 }
 
 
-function libraryColorIcon(type,id,color,icon){
- color=/^#[0-9a-f]{6}$/i.test(color||'')?color:'#007AAD';
- let title=type==='folder'?'Cambiar color de carpeta':'Cambiar color de jugada o drill';
- return '<label class="tree-color-target" title="'+title+'" style="color:'+color+'">'+icon+'<input class="tree-color-picker" type="color" '+(type==='folder'?'data-fcolor':'data-pcolor')+'="'+esc(id)+'" value="'+color+'" aria-label="'+title+'"></label>';
-}
+function libraryColorIcon(type,id,color,icon){return '<span class="tree-item-icon" aria-hidden="true">'+icon+'</span>'}
+
 function changeLibraryColor(type,id,color){
  if(!/^#[0-9a-f]{6}$/i.test(color))return false;
  let item=(type==='folder'?state.folders:state.plays).find(x=>x.id===id);
@@ -474,16 +498,23 @@ function libraryRowForeground(color){
  const l=.2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2];
  return (l+.05)/(.012+.05) >= 1.05/(l+.05)?'#0C1D32':'#FFFFFF';
 }
+
+function libraryTint(color,background,amount){
+ color=/^#[0-9a-f]{6}$/i.test(color||'')?color:'#007AAD';
+ let rgb=[1,3,5].map(i=>Math.round(parseInt(color.slice(i,i+2),16)*amount+parseInt(background.slice(i,i+2),16)*(1-amount)));
+ return '#'+rgb.map(c=>c.toString(16).padStart(2,'0')).join('').toUpperCase();
+}
 function libraryRowStyle(color,depth){
  color=/^#[0-9a-f]{6}$/i.test(color||'')?color:'#007AAD';
- return '--depth:'+depth+';--row-bg:'+color+';--row-fg:'+libraryRowForeground(color);
+ return '--depth:'+depth+';--row-color:'+color+';--row-bg:'+libraryTint(color,'#FFFBFC',.18)+';--row-bg-dark:'+libraryTint(color,'#0C1D32',.24)+';--row-fg:#0C1D32';
 }
+
 function libraryPlayRow(p,rowDepth,folderColor){
  const color=p.color||folderColor||'#007AAD';
- return '<div class="row play has-row-color '+(p.id===pid?'current':'')+'" role="treeitem" data-library-key="p:'+esc(p.id)+'" aria-selected="false" style="'+libraryRowStyle(color,rowDepth)+'"><span class="tree-spacer"></span>'+libraryColorIcon('play',p.id,color,libraryPlayIcon())+'<span class="label" data-play="'+esc(p.id)+'" title="'+esc(p.name)+'">'+esc(p.name)+'</span>'+libraryAction('data-pdelete',p.id,'Eliminar jugada','×')+'</div>';
+ return '<div class="row play has-row-color '+(p.id===pid?'current':'')+'" role="treeitem" data-library-key="p:'+esc(p.id)+'" aria-selected="false" style="'+libraryRowStyle(color,rowDepth)+'"><span class="tree-spacer"></span>'+libraryColorIcon('play',p.id,color,libraryPlayIcon())+'<span class="label" data-play="'+esc(p.id)+'" title="'+esc(p.name)+'">'+esc(p.name)+'</span>'+'<span class="tree-actions"><details class="tree-menu"><summary title="Más opciones">⋯</summary><div>'+libraryAction('data-pname',p.id,'Renombrar jugada','✎')+libraryAction('data-colorplay',p.id,'Cambiar color','▦')+libraryAction('data-pdelete',p.id,'Eliminar jugada','×')+'</div></details></span>'+'</div>';
 }
 function libraryFolderHeader(f,depth,open){
- return '<div class="row folder-row has-row-color '+(libraryFolder===f.id?'folder-selected':'')+'" role="treeitem" data-library-key="f:'+esc(f.id)+'" aria-selected="false" aria-expanded="'+!!open+'" style="'+libraryRowStyle(f.color,depth)+'"><button class="chevron" data-collapse="'+esc(f.id)+'" title="'+(open?'Contraer':'Expandir')+' carpeta"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4L10 8L6 12"/></svg></button>'+libraryColorIcon('folder',f.id,f.color,libraryFolderIcon())+'<span class="label" data-rename-folder="'+esc(f.id)+'" data-collapse="'+esc(f.id)+'" title="'+esc(f.name)+'">'+esc(f.name)+'</span><span class="tree-actions">'+libraryAction('data-addsequence',f.id,'Agregar jugada o drill','+')+'<details class="tree-menu"><summary title="Más opciones">⋯</summary><div>'+libraryAction('data-subfolder',f.id,'Crear subcarpeta','⊞')+libraryAction('data-fname',f.id,'Renombrar carpeta','✎')+libraryAction('data-fdelete',f.id,'Eliminar carpeta','×')+'</div></details></span></div>';
+ return '<div class="row folder-row has-row-color '+(libraryFolder===f.id?'folder-selected':'')+'" role="treeitem" data-library-key="f:'+esc(f.id)+'" aria-selected="false" aria-expanded="'+!!open+'" style="'+libraryRowStyle(f.color,depth)+'"><button class="chevron" data-collapse="'+esc(f.id)+'" title="'+(open?'Contraer':'Expandir')+' carpeta"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4L10 8L6 12"/></svg></button>'+libraryColorIcon('folder',f.id,f.color,libraryFolderIcon())+'<span class="label" data-rename-folder="'+esc(f.id)+'" data-collapse="'+esc(f.id)+'" title="'+esc(f.name)+'">'+esc(f.name)+'</span><span class="tree-actions">'+libraryAction('data-addsequence',f.id,'Agregar jugada o drill','+')+'<details class="tree-menu"><summary title="Más opciones">⋯</summary><div>'+libraryAction('data-subfolder',f.id,'Crear subcarpeta','⊞')+libraryAction('data-fname',f.id,'Renombrar carpeta','✎')+libraryAction('data-colorfolder',f.id,'Cambiar color','▦')+libraryAction('data-fdelete',f.id,'Eliminar carpeta','×')+'</div></details></span></div>';
 }
 function library(){
  const query=$('search').value.trim().toLowerCase();
@@ -614,7 +645,7 @@ function syncExportSelection(){
  });
  $('count').textContent=selected.size+' jugadas seleccionadas';
 }
-function libraryControl(target){return target.closest('button,input,textarea,summary,.tree-menu,.inline-rename,.tree-color-target')}
+function libraryControl(target){return target.closest('button,input,textarea,summary,.tree-menu,.inline-rename')}
 function activateLibraryPlay(id){if(!state.plays.some(p=>p.id===id))return;closeDrawers();pid=id;libraryFolder=play().folder;sid=play().steps[0].id;editorSelection.clear();lineDraft=null;focus=null;render()}
 function removeLibraryBox(){if(libraryBox){libraryBox.remove();libraryBox=null}}
 function installLibrarySelection(){
@@ -693,7 +724,7 @@ function leaveLibraryFolder(ev){
  let row=target.closest('[data-library-key]');
  if(!row){
   clearTimeout(renameClickTimer);libraryFolder=null;
-  if(!target.closest('.export-button,#export')&&!ev.ctrlKey&&!ev.metaKey&&!ev.shiftKey){libraryPicked.clear();libraryAnchor=null}
+  if(!target.closest('.export-button,#export,#library-color-popup')&&!ev.ctrlKey&&!ev.metaKey&&!ev.shiftKey){libraryPicked.clear();libraryAnchor=null}
   syncExportSelection();
  }
 }
@@ -707,6 +738,69 @@ $('library').addEventListener('keydown',ev=>{
  if(ev.key==='Escape'){ev.preventDefault();finishFolderName(true)}
 });
 $('library').addEventListener('focusout',ev=>{if(ev.target.matches('[data-new-folder-name]')&&folderDraft){folderDraft.name=ev.target.value;finishFolderName(false,true)}});
+
+
+var libraryPaletteTarget=null;
+const LIBRARY_RECENT_COLOR_KEY='design-play-library-recent-colors-v1';
+function normalizeLibraryColor(color){
+ color=String(color||'').trim();if(color&&!color.startsWith('#'))color='#'+color;
+ if(/^#[0-9a-f]{3}$/i.test(color))color='#'+color.slice(1).split('').map(c=>c+c).join('');
+ return /^#[0-9a-f]{6}$/i.test(color)?color.toUpperCase():null;
+}
+function recentLibraryColors(){
+ let stored=[];try{stored=JSON.parse(localStorage.getItem(LIBRARY_RECENT_COLOR_KEY)||'[]')}catch(e){}
+ const values=[...(Array.isArray(stored)?stored:[]),...(Array.isArray(state.libraryRecentColors)?state.libraryRecentColors:[]),...state.folders.map(f=>f.color),...state.plays.map(p=>p.color)];
+ return [...new Set(values.map(normalizeLibraryColor).filter(Boolean))].slice(0,20);
+}
+function rememberLibraryColor(color){
+ color=normalizeLibraryColor(color);if(!color)return;
+ state.libraryRecentColors=[color,...recentLibraryColors().filter(c=>c!==color)].slice(0,20);
+ try{localStorage.setItem(LIBRARY_RECENT_COLOR_KEY,JSON.stringify(state.libraryRecentColors))}catch(e){}
+ save();
+}
+function libraryPaletteColors(){
+ const themes=['#FFFFFF','#111827','#D9E2E9','#0C1D32','#007AAD','#2563EB','#7C3AED','#DB2777','#E87515','#159447'];
+ return themes.concat(...[.8,.6,.4,.2].map(amount=>themes.map(c=>libraryTint(c,'#FFFFFF',amount))));
+}
+function paletteSwatches(colors,current){
+ return colors.map(color=>'<button class="library-color-swatch '+(color===current?'chosen':'')+'" type="button" data-library-color="'+color+'" style="background:'+color+'" aria-label="Color '+color+'" aria-pressed="'+(color===current)+'" title="'+color+'"></button>').join('');
+}
+function closeLibraryPalette(){
+ const popup=$('library-color-popup');if(popup)popup.remove();libraryPaletteTarget=null;
+}
+function openLibraryPalette(type,id,anchor){
+ closeLibraryPalette();
+ const item=(type==='folder'?state.folders:state.plays).find(x=>x.id===id);if(!item)return;
+ const folder=type==='play'?state.folders.find(f=>f.id===item.folder):item;
+ const current=normalizeLibraryColor(item.color||folder?.color||'#007AAD');
+ libraryPaletteTarget={type,id};
+ const popup=document.createElement('div');popup.id='library-color-popup';popup.className='library-color-popup';popup.setAttribute('role','dialog');popup.setAttribute('aria-label','Cambiar color de fila');
+ popup.innerHTML='<header><strong>Color de fila</strong><button type="button" data-palette-close aria-label="Cerrar paleta">×</button></header><p class="palette-item-name">'+esc(item.name)+'</p><p class="palette-caption">Colores</p><div class="library-color-grid">'+paletteSwatches(libraryPaletteColors(),current)+'</div><p class="palette-caption">Colores recientes</p><div class="library-color-grid palette-recents">'+paletteSwatches(recentLibraryColors(),current)+'</div><label class="palette-custom">Personalizado<input id="library-custom-color" aria-label="Color hexadecimal" value="'+current+'" maxlength="7" spellcheck="false"><button type="button" data-palette-custom>Aplicar</button></label><p class="palette-error" role="alert"></p><small>Se aplica como un tono suave a toda la fila.</small>';
+ $('app-frame').append(popup);
+ const frame=$('app-frame'),fr=frame.getBoundingClientRect(),r=anchor.getBoundingClientRect(),scale=fr.width/1672,width=332;
+ let left=(r.right-fr.left)/scale+8,top=(r.top-fr.top)/scale;
+ left=Math.max(8,Math.min(1672-width-8,left));top=Math.max(8,Math.min(frame.clientHeight-popup.offsetHeight-8,top));
+ popup.style.left=left+'px';popup.style.top=top+'px';
+ popup.querySelector('.library-color-swatch')?.focus({preventScroll:true});
+ popup.onclick=ev=>{
+  if(ev.target.closest('[data-palette-close]')){closeLibraryPalette();return}
+  let swatch=ev.target.closest('[data-library-color]');
+  if(swatch){applyLibraryPaletteColor(swatch.dataset.libraryColor);return}
+  if(ev.target.closest('[data-palette-custom]'))applyLibraryPaletteColor($('library-custom-color').value);
+ };
+ popup.addEventListener('keydown',ev=>{ev.stopPropagation();if(ev.key==='Escape'){ev.preventDefault();closeLibraryPalette()}else if(ev.key==='Enter'&&ev.target.id==='library-custom-color'){ev.preventDefault();applyLibraryPaletteColor(ev.target.value)}});
+}
+function applyLibraryPaletteColor(color){
+ color=normalizeLibraryColor(color);const popup=$('library-color-popup');
+ if(!color){if(popup)popup.querySelector('.palette-error').textContent='Escribe un color como #007AAD.';return false}
+ if(!libraryPaletteTarget)return false;
+ const {type,id}=libraryPaletteTarget;
+ if(!(type==='folder'?state.folders:state.plays).some(x=>x.id===id)){closeLibraryPalette();return false}
+ changeLibraryColor(type,id,color);rememberLibraryColor(color);closeLibraryPalette();library();return true;
+}
+document.addEventListener('pointerdown',ev=>{
+ if(libraryPaletteTarget&&!ev.target.closest('#library-color-popup,[data-colorfolder],[data-colorplay]'))closeLibraryPalette();
+},true);
 
 installLibrarySelection();installInlineRenaming($('steps'));
 
