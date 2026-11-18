@@ -284,6 +284,20 @@ body:not(.light) .palette-item-name,body:not(.light) .library-color-popup small{
 .library .row .tree-item-icon svg{display:block;flex-shrink:0}
 .library .row.play.current:not(.export-selected):not(.has-row-color){background:transparent!important;color:inherit!important}
 .library .row.play.current:not(.export-selected) .label{color:inherit}
+
+/* Six-dot handles reorder existing rows without changing their names. */
+.library .row[data-library-key]{position:relative;padding-left:calc(24px + var(--depth,0)*18px)}
+.library .tree-drag-handle{position:absolute;left:calc(3px + var(--depth,0)*18px);top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:center;width:15px;height:26px;padding:0;border:0;background:transparent!important;color:inherit;opacity:.6;cursor:grab;touch-action:none}
+.library .tree-drag-handle svg{width:12px;height:17px;pointer-events:none;color:inherit!important}
+.library .tree-drag-handle:hover,.library .tree-drag-handle:focus-visible{opacity:1}
+.library .tree-drag-handle:active{cursor:grabbing}
+.library .tree-drag-handle:focus-visible{outline:1px solid currentColor;outline-offset:1px}
+.library .tree-children:before{left:31px}
+.library .row.library-sort-source{opacity:.5}
+.library .row.library-drop-before{box-shadow:inset 0 3px #007AAD!important}
+.library .row.library-drop-after{box-shadow:inset 0 -3px #007AAD!important}
+body:not(.light) .library .row.library-drop-before{box-shadow:inset 0 3px #89BFD4!important}
+body:not(.light) .library .row.library-drop-after{box-shadow:inset 0 -3px #89BFD4!important}
 </style><div id="app-frame"><header class="top"><div class="brand"><img src="/PLAYCREATE/icon-192-flat.png" width="46" height="46" style="border-radius:10px" alt="Logo Design Play">DESIGN PLAY</div><h1 id="title" class="work-title" aria-label="Jugada o drill actual" aria-live="polite"></h1><span id="save">Guardado</span><button class="head-action undo" onclick="undo()" title="Deshacer">↶</button><button class="head-action redo" onclick="redo()" title="Rehacer">↷</button><button class="head-action theme" onclick="theme()" title="Tema claro u oscuro">☀</button><button class="primary export-button" onclick="exportDialog()">⇧ Exportar PDF</button></header><div class="layout"><aside><h3 class="library-title">BIBLIOTECA</h3><input id="search" placeholder="⌕   Buscar jugadas..." oninput="library()"><button class="new-play create-folder-text" onclick="addFolder()">+ Crear carpeta</button><div class="library" id="library" role="tree" aria-multiselectable="true" aria-label="Carpetas y jugadas"></div><div class="utility"><button onclick="backup()">Respaldo</button><button onclick="$('file').click()">Importar</button></div><span id="count" hidden></span><input hidden id="file" type="file" accept=".json"></aside><main><div class="tools" id="tools" aria-label="Herramientas de dibujo"></div><div class="toolbar"><button id="half" onclick="setCourt(false)">⚿　Media cancha</button><button id="full" onclick="setCourt(true)">⚿　Cancha completa</button><select hidden id="lineShape"><option value="straight">Recta</option></select><span hidden id="zoomValue">100 %</span></div><div class="drawing-tip" id="drawingTip">Elige una acción y arrastra. Para curvar, mueve el punto celeste. Balón: toca al jugador que lo tiene.</div><div class="court-space"><div class="board"><svg id="court" xmlns="http://www.w3.org/2000/svg"></svg></div></div><section class="sequence-column" aria-label="Secuencias de la jugada"><h3 class="sequence-title">SECUENCIA</h3><div id="steps" class="strip"></div></section><textarea id="notes" class="notes" placeholder="Notas de este paso…"></textarea></main><aside hidden><h3 class="properties-title">PROPIEDADES</h3><div class="props"><label>Color:<span class="palette"><input type="color" id="color" value="#0066ff"><button class="swatch" style="background:#0050d7" onclick="chooseColor('#0050d7')"></button><button class="swatch" style="background:#71aff5" onclick="chooseColor('#71aff5')"></button><button class="swatch" style="background:#b5d9fc" onclick="chooseColor('#b5d9fc')"></button><button class="swatch" style="background:#fff" onclick="chooseColor('#ffffff')"></button></span></label><label>Tamaño:<input id="size" type="range" min="12" max="32" value="26"></label><label>Número:<input id="number" value="1" aria-label="Número o texto"></label><div><label>Grosor de línea:<input hidden id="width" type="range" min="2" max="8" value="4"></label><div class="width-buttons"><button onclick="chooseWidth(2)">―</button><button onclick="chooseWidth(4)">━</button><button onclick="chooseWidth(7)">▬</button></div></div></div><div class="element-more"><button onclick="applyTeam('player')">Color ataque</button><button onclick="applyTeam('defender')">Color defensa</button><button onclick="duplicateElement()">Duplicar ficha</button><button onclick="straightenLine()" title="Selecciona una línea y arrastra el círculo central para curvarla">Enderezar línea</button><button onclick="duplicateStep()">Duplicar paso</button><button onclick="renameStep()">Renombrar paso</button><button onclick="deleteStep()">Eliminar paso</button></div><span id="hint" hidden></span></aside></div><footer class="bottom"><strong id="stepStatus"></strong><span><kbd>← →</kbd>Cambiar paso</span><span title="Ctrl + C copia el paso actual; Ctrl + V agrega la copia"><kbd>Ctrl + C / V</kbd>Copiar / Pegar paso</span><span><kbd>Supr</kbd>Borrar selección</span><span><kbd>Ctrl + Z</kbd>Deshacer</span><span><kbd>Ctrl + Y</kbd>Rehacer</span><span><kbd>Ctrl + E</kbd>Exportar</span></footer><div id="export" class="export-pop" hidden><button class="close-pop" onclick="$('export').hidden=true">×</button><h2>♧ Exportar selección</h2><small style="font-size:12px">Carpetas y jugadas seleccionadas</small><p id="exportInfo"></p><p>Exporta en un único PDF una o varias carpetas completas o jugadas individuales.</p><hr><label><input type="checkbox" checked disabled>Incluir todos los pasos</label><select id="perpage"><option value="1">1 paso por página</option><option value="2">2 pasos por página</option></select><button class="primary" onclick="printPDF()">⇧ Generar PDF</button></div></div><script>
 function closeDrawers(){document.querySelector('.layout').classList.remove('library-open','tools-open')}function toggleDrawer(name){let el=document.querySelector('.layout'),open=el.classList.contains(name+'-open');closeDrawers();if(!open)el.classList.add(name+'-open')}
 const $=id=>document.getElementById(id), uid=()=>crypto.randomUUID(), clone=x=>JSON.parse(JSON.stringify(x)), esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -537,12 +551,17 @@ function libraryRowStyle(color,depth){
  return '--depth:'+depth+';--row-color:'+color+';--row-bg:'+libraryTint(color,'#FFFBFC',.32)+';--row-bg-dark:'+libraryTint(color,'#0C1D32',.36)+';--row-fg:#0C1D32';
 }
 
+
+function libraryDragHandle(key){
+ return '<button type="button" class="tree-drag-handle" data-library-drag-key="'+esc(key)+'" aria-label="Reordenar: arrastra arriba o abajo" title="Arrastra para reordenar"><svg viewBox="0 0 10 14" aria-hidden="true" fill="currentColor"><circle cx="3" cy="3" r="1"/><circle cx="7" cy="3" r="1"/><circle cx="3" cy="7" r="1"/><circle cx="7" cy="7" r="1"/><circle cx="3" cy="11" r="1"/><circle cx="7" cy="11" r="1"/></svg></button>';
+}
+
 function libraryPlayRow(p,rowDepth){
  const color=normalizeLibraryColor(p.color);
- return '<div class="row play '+(color?'has-row-color ':'')+(p.id===pid?'current':'')+'" role="treeitem" data-library-key="p:'+esc(p.id)+'" aria-selected="false" style="'+(color?libraryRowStyle(color,rowDepth):'--depth:'+rowDepth)+'"><span class="tree-spacer"></span>'+libraryColorIcon('play',p.id,color,libraryPlayIcon())+'<span class="label" data-play="'+esc(p.id)+'" title="'+esc(p.name)+'">'+esc(p.name)+'</span>'+'<span class="tree-actions"><details class="tree-menu"><summary title="Más opciones">⋯</summary><div>'+libraryAction('data-pname',p.id,'Renombrar jugada','✎')+libraryAction('data-colorplay',p.id,'Cambiar color','▦')+libraryAction('data-pdelete',p.id,'Eliminar jugada','×')+'</div></details></span>'+'</div>';
+ return '<div class="row play '+(color?'has-row-color ':'')+(p.id===pid?'current':'')+'" role="treeitem" data-library-key="p:'+esc(p.id)+'" aria-selected="false" style="'+(color?libraryRowStyle(color,rowDepth):'--depth:'+rowDepth)+'">'+libraryDragHandle('p:'+p.id)+'<span class="tree-spacer"></span>'+libraryColorIcon('play',p.id,color,libraryPlayIcon())+'<span class="label" data-play="'+esc(p.id)+'" title="'+esc(p.name)+'">'+esc(p.name)+'</span>'+'<span class="tree-actions"><details class="tree-menu"><summary title="Más opciones">⋯</summary><div>'+libraryAction('data-pname',p.id,'Renombrar jugada','✎')+libraryAction('data-colorplay',p.id,'Cambiar color','▦')+libraryAction('data-pdelete',p.id,'Eliminar jugada','×')+'</div></details></span>'+'</div>';
 }
 function libraryFolderHeader(f,depth,open){
- return '<div class="row folder-row has-row-color '+(libraryFolder===f.id?'folder-selected':'')+'" role="treeitem" data-library-key="f:'+esc(f.id)+'" aria-selected="false" aria-expanded="'+!!open+'" style="'+libraryRowStyle(f.color,depth)+'"><button class="chevron" data-collapse="'+esc(f.id)+'" title="'+(open?'Contraer':'Expandir')+' carpeta"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4L10 8L6 12"/></svg></button>'+libraryColorIcon('folder',f.id,f.color,libraryFolderIcon())+'<span class="label" data-rename-folder="'+esc(f.id)+'" data-collapse="'+esc(f.id)+'" title="'+esc(f.name)+'">'+esc(f.name)+'</span><span class="tree-actions">'+libraryAction('data-addsequence',f.id,'Agregar jugada o drill','+')+'<details class="tree-menu"><summary title="Más opciones">⋯</summary><div>'+libraryAction('data-subfolder',f.id,'Crear subcarpeta','⊞')+libraryAction('data-fname',f.id,'Renombrar carpeta','✎')+libraryAction('data-colorfolder',f.id,'Cambiar color','▦')+libraryAction('data-fdelete',f.id,'Eliminar carpeta','×')+'</div></details></span></div>';
+ return '<div class="row folder-row has-row-color '+(libraryFolder===f.id?'folder-selected':'')+'" role="treeitem" data-library-key="f:'+esc(f.id)+'" aria-selected="false" aria-expanded="'+!!open+'" style="'+libraryRowStyle(f.color,depth)+'">'+libraryDragHandle('f:'+f.id)+'<button class="chevron" data-collapse="'+esc(f.id)+'" title="'+(open?'Contraer':'Expandir')+' carpeta"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4L10 8L6 12"/></svg></button>'+libraryColorIcon('folder',f.id,f.color,libraryFolderIcon())+'<span class="label" data-rename-folder="'+esc(f.id)+'" data-collapse="'+esc(f.id)+'" title="'+esc(f.name)+'">'+esc(f.name)+'</span><span class="tree-actions">'+libraryAction('data-addsequence',f.id,'Agregar jugada o drill','+')+'<details class="tree-menu"><summary title="Más opciones">⋯</summary><div>'+libraryAction('data-subfolder',f.id,'Crear subcarpeta','⊞')+libraryAction('data-fname',f.id,'Renombrar carpeta','✎')+libraryAction('data-colorfolder',f.id,'Cambiar color','▦')+libraryAction('data-fdelete',f.id,'Eliminar carpeta','×')+'</div></details></span></div>';
 }
 function library(){
  const query=$('search').value.trim().toLowerCase();
@@ -859,6 +878,79 @@ document.addEventListener('pointerdown',ev=>{
  else if(ev.target.closest('#court,#tools'))deleteContext='court';
 },true);
 
+
+var librarySortDrag=null,suppressLibrarySortClick=false;
+function librarySortInfo(key){
+ const type=key?.slice(0,2),id=key?.slice(2);
+ const list=type==='f:'?state.folders:type==='p:'?state.plays:null;
+ const item=list?.find(x=>x.id===id);if(!item)return null;
+ return {type,id,item,list,parent:type==='f:'?(item.parent||null):item.folder};
+}
+function canReorderLibrary(sourceKey,targetKey){
+ const source=librarySortInfo(sourceKey),target=librarySortInfo(targetKey);
+ return !!(source&&target&&source.id!==target.id&&source.type===target.type&&source.parent===target.parent);
+}
+function reorderLibraryItem(sourceKey,targetKey,after){
+ if(!canReorderLibrary(sourceKey,targetKey))return false;
+ const source=librarySortInfo(sourceKey),target=librarySortInfo(targetKey);
+ const next=source.list.filter(x=>x.id!==source.id),targetIndex=next.findIndex(x=>x.id===target.id);
+ next.splice(targetIndex+(after?1:0),0,source.item);
+ if(next.every((item,i)=>item===source.list[i]))return false;
+ checkpoint();
+ if(source.type==='f:')state.folders=next;else state.plays=next;
+ library();save();return true;
+}
+function clearLibrarySortMarker(){
+ $('library').querySelectorAll('.library-drop-before,.library-drop-after,.library-sort-source').forEach(row=>row.classList.remove('library-drop-before','library-drop-after','library-sort-source'));
+}
+function installLibraryReordering(){
+ const root=$('library');
+ root.addEventListener('pointerdown',ev=>{
+  const handle=ev.target.closest('[data-library-drag-key]');if(!handle){suppressLibrarySortClick=false;return}if(ev.button!==0)return;
+  ev.preventDefault();ev.stopImmediatePropagation();clearTimeout(renameClickTimer);suppressLibrarySortClick=false;
+  if(!librarySortInfo(handle.dataset.libraryDragKey))return;
+  libraryDrag=null;removeLibraryBox();
+  librarySortDrag={key:handle.dataset.libraryDragKey,x:ev.clientX,y:ev.clientY,moving:false,target:null,after:false};
+  root.setPointerCapture(ev.pointerId);
+ },true);
+ root.addEventListener('pointermove',ev=>{
+  const drag=librarySortDrag;if(!drag)return;ev.preventDefault();ev.stopImmediatePropagation();
+  if(!drag.moving&&Math.hypot(ev.clientX-drag.x,ev.clientY-drag.y)<5)return;
+  drag.moving=true;const bounds=root.getBoundingClientRect();
+  if(ev.clientY<bounds.top+22)root.scrollTop-=12;else if(ev.clientY>bounds.bottom-22)root.scrollTop+=12;
+  clearLibrarySortMarker();
+  const source=[...root.querySelectorAll('[data-library-key]')].find(row=>row.dataset.libraryKey===drag.key);source?.classList.add('library-sort-source');
+  const target=document.elementFromPoint(ev.clientX,ev.clientY)?.closest('[data-library-key]');
+  if(!target||!root.contains(target)||!canReorderLibrary(drag.key,target.dataset.libraryKey)){drag.target=null;return}
+  const rect=target.getBoundingClientRect();drag.target=target.dataset.libraryKey;drag.after=ev.clientY>rect.top+rect.height/2;
+  target.classList.add(drag.after?'library-drop-after':'library-drop-before');
+ },true);
+ root.addEventListener('pointerup',ev=>{
+  const drag=librarySortDrag;if(!drag)return;ev.preventDefault();ev.stopImmediatePropagation();
+  librarySortDrag=null;suppressLibrarySortClick=true;
+  if(root.hasPointerCapture(ev.pointerId))root.releasePointerCapture(ev.pointerId);
+  clearLibrarySortMarker();
+  if(drag.moving&&drag.target)reorderLibraryItem(drag.key,drag.target,drag.after);
+ },true);
+ root.addEventListener('pointercancel',ev=>{
+  if(!librarySortDrag)return;librarySortDrag=null;suppressLibrarySortClick=true;
+  if(root.hasPointerCapture(ev.pointerId))root.releasePointerCapture(ev.pointerId);
+  clearLibrarySortMarker();
+ },true);
+ root.addEventListener('click',ev=>{
+  if(suppressLibrarySortClick||ev.target.closest('[data-library-drag-key]')){suppressLibrarySortClick=false;ev.preventDefault();ev.stopImmediatePropagation()}
+ },true);
+ root.addEventListener('keydown',ev=>{
+  const handle=ev.target.closest('[data-library-drag-key]');
+  if(!handle||!ev.altKey||!['ArrowUp','ArrowDown'].includes(ev.key))return;
+  ev.preventDefault();ev.stopImmediatePropagation();const key=handle.dataset.libraryDragKey,info=librarySortInfo(key);if(!info)return;
+  const siblings=info.list.filter(item=>(info.type==='f:'?(item.parent||null):item.folder)===info.parent);
+  const i=siblings.findIndex(item=>item.id===info.id),target=siblings[i+(ev.key==='ArrowDown'?1:-1)];
+  if(target&&reorderLibraryItem(key,info.type+target.id,ev.key==='ArrowDown'))[...root.querySelectorAll('[data-library-drag-key]')].find(el=>el.dataset.libraryDragKey===key)?.focus({preventScroll:true});
+ },true);
+}
+
+installLibraryReordering();
 installLibrarySelection();installInlineRenaming($('steps'));
 
 setTool('select');render();
