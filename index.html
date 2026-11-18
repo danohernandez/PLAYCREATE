@@ -231,6 +231,24 @@ body:not(.light) .layout>aside .new-play.create-folder-text{color:#FFFFFF!import
 .library .tree-color-target:hover,.library .tree-color-target:focus-within{outline:1px solid #007AAD;background:#FFFFFF}
 .library .tree-color-target .tree-color-picker{position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;opacity:0;border:0;cursor:pointer}
 .library .row.export-selected .tree-color-target{background:#FFFBFC}
+
+/* Folder creation stays a text action; hover highlights the entire label. */
+.layout>aside .new-play.create-folder-text{padding:2px 6px;text-decoration:none!important}
+.layout>aside .new-play.create-folder-text:hover,.layout>aside .new-play.create-folder-text:focus-visible{background:#007aad20!important;color:#005C83!important;text-decoration:none!important;font-weight:650}
+body:not(.light) .layout>aside .new-play.create-folder-text:hover,body:not(.light) .layout>aside .new-play.create-folder-text:focus-visible{background:#FFFFFF20!important;color:#FFFFFF!important}
+/* Apply chosen colors to the whole folder or play row. */
+.library .row.has-row-color,.library .row.has-row-color.current:not(.export-selected),.library .row.has-row-color.export-selected,.library .row.has-row-color:hover:not(.current){background:var(--row-bg)!important;color:var(--row-fg)!important}
+.library .row.has-row-color .label,.library .row.has-row-color.export-selected .label{color:var(--row-fg)!important}
+.library .row.has-row-color .tree-color-target,.library .row.has-row-color.export-selected .tree-color-target{color:var(--row-fg)!important;background:transparent}
+.library .row.has-row-color .tree-actions{color:var(--row-fg)}
+.library .row.has-row-color:hover{box-shadow:inset 0 0 0 100px #FFFFFF16}
+.library .row.has-row-color.export-selected{outline:2px solid #0C1D32;outline-offset:-2px}
+body:not(.light) .library .row.has-row-color.export-selected{outline-color:#FFFFFF}
+.library .row.has-row-color.current .label{font-weight:650}
+.library .row.has-row-color .tree-color-target:hover,.library .row.has-row-color .tree-color-target:focus-within{outline:1px solid currentColor;background:#FFFFFF22}
+.library .tree-new-folder{background:#007aad12;color:#007AAD}
+.library .tree-new-folder .folder-icon{width:19px;height:19px;flex:0 0 19px}
+.library .tree-new-folder .inline-play-name{flex:1;min-width:0}
 </style><div id="app-frame"><header class="top"><div class="brand"><img src="/PLAYCREATE/icon-192-flat.png" width="46" height="46" style="border-radius:10px" alt="Logo Design Play">DESIGN PLAY</div><h1 id="title" class="work-title" aria-label="Jugada o drill actual" aria-live="polite"></h1><span id="save">Guardado</span><button class="head-action undo" onclick="undo()" title="Deshacer">↶</button><button class="head-action redo" onclick="redo()" title="Rehacer">↷</button><button class="head-action theme" onclick="theme()" title="Tema claro u oscuro">☀</button><button class="primary export-button" onclick="exportDialog()">⇧ Exportar PDF</button></header><div class="layout"><aside><h3 class="library-title">BIBLIOTECA</h3><input id="search" placeholder="⌕   Buscar jugadas..." oninput="library()"><button class="new-play create-folder-text" onclick="addFolder()">+ Crear carpeta</button><div class="library" id="library" role="tree" aria-multiselectable="true" aria-label="Carpetas y jugadas"></div><div class="utility"><button onclick="backup()">Respaldo</button><button onclick="$('file').click()">Importar</button></div><span id="count" hidden></span><input hidden id="file" type="file" accept=".json"></aside><main><div class="tools" id="tools" aria-label="Herramientas de dibujo"></div><div class="toolbar"><button id="half" onclick="setCourt(false)">⚿　Media cancha</button><button id="full" onclick="setCourt(true)">⚿　Cancha completa</button><select hidden id="lineShape"><option value="straight">Recta</option></select><span hidden id="zoomValue">100 %</span></div><div class="drawing-tip" id="drawingTip">Elige una acción y arrastra. Para curvar, mueve el punto celeste. Balón: toca al jugador que lo tiene.</div><div class="court-space"><div class="board"><svg id="court" xmlns="http://www.w3.org/2000/svg"></svg></div></div><section class="sequence-column" aria-label="Secuencias de la jugada"><h3 class="sequence-title">SECUENCIA</h3><div id="steps" class="strip"></div></section><textarea id="notes" class="notes" placeholder="Notas de este paso…"></textarea></main><aside hidden><h3 class="properties-title">PROPIEDADES</h3><div class="props"><label>Color:<span class="palette"><input type="color" id="color" value="#0066ff"><button class="swatch" style="background:#0050d7" onclick="chooseColor('#0050d7')"></button><button class="swatch" style="background:#71aff5" onclick="chooseColor('#71aff5')"></button><button class="swatch" style="background:#b5d9fc" onclick="chooseColor('#b5d9fc')"></button><button class="swatch" style="background:#fff" onclick="chooseColor('#ffffff')"></button></span></label><label>Tamaño:<input id="size" type="range" min="12" max="32" value="26"></label><label>Número:<input id="number" value="1" aria-label="Número o texto"></label><div><label>Grosor de línea:<input hidden id="width" type="range" min="2" max="8" value="4"></label><div class="width-buttons"><button onclick="chooseWidth(2)">―</button><button onclick="chooseWidth(4)">━</button><button onclick="chooseWidth(7)">▬</button></div></div></div><div class="element-more"><button onclick="applyTeam('player')">Color ataque</button><button onclick="applyTeam('defender')">Color defensa</button><button onclick="duplicateElement()">Duplicar ficha</button><button onclick="straightenLine()" title="Selecciona una línea y arrastra el círculo central para curvarla">Enderezar línea</button><button onclick="duplicateStep()">Duplicar paso</button><button onclick="renameStep()">Renombrar paso</button><button onclick="deleteStep()">Eliminar paso</button></div><span id="hint" hidden></span></aside></div><footer class="bottom"><strong id="stepStatus"></strong><span><kbd>← →</kbd>Cambiar paso</span><span title="Ctrl + C copia el paso actual; Ctrl + V agrega la copia"><kbd>Ctrl + C / V</kbd>Copiar / Pegar paso</span><span><kbd>Supr</kbd>Borrar selección</span><span><kbd>Ctrl + Z</kbd>Deshacer</span><span><kbd>Ctrl + Y</kbd>Rehacer</span><span><kbd>Ctrl + E</kbd>Exportar</span></footer><div id="export" class="export-pop" hidden><button class="close-pop" onclick="$('export').hidden=true">×</button><h2>♧ Exportar selección</h2><small style="font-size:12px">Carpetas y jugadas seleccionadas</small><p id="exportInfo"></p><p>Exporta en un único PDF una o varias carpetas completas o jugadas individuales.</p><hr><label><input type="checkbox" checked disabled>Incluir todos los pasos</label><select id="perpage"><option value="1">1 paso por página</option><option value="2">2 pasos por página</option></select><button class="primary" onclick="printPDF()">⇧ Generar PDF</button></div></div><script>
 function closeDrawers(){document.querySelector('.layout').classList.remove('library-open','tools-open')}function toggleDrawer(name){let el=document.querySelector('.layout'),open=el.classList.contains(name+'-open');closeDrawers();if(!open)el.classList.add(name+'-open')}
 const $=id=>document.getElementById(id), uid=()=>crypto.randomUUID(), clone=x=>JSON.parse(JSON.stringify(x)), esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -404,9 +422,36 @@ function board(){let p=play(),s=step(),t=projection(p.full),w=t.w/courtZoom,h=t.
 function straightenLine(){let e=step().elements.find(e=>e.id===focus);if(e&&e.ex!=null){checkpoint();delete e.cx;delete e.cy;e.lineShape='straight';render()}}function curveControl(e){return {x:e.cx??(e.x+e.ex)/2,y:e.cy??(e.y+e.ey)/2}}
 function coords(ev){let pt=$('court').createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;let p=pt.matrixTransform($('court').getScreenCTM().inverse()),t=projection(play().full);return{x:Math.max(25,Math.min(575,(p.x-t.ox)/t.sx)),y:Math.max(25,Math.min(play().full?1035:535,(p.y-t.oy)/t.sy))}}
 
-var libraryFolder=null,libraryDraft=null,libraryPicked=new Set(),libraryAnchor=null,libraryDrag=null,suppressLibraryClick=false,libraryBox=null,activeLibraryRename=null;
+var libraryFolder=null,libraryDraft=null,libraryPicked=new Set(),libraryAnchor=null,libraryDrag=null,suppressLibraryClick=false,libraryBox=null,activeLibraryRename=null,folderDraft=null;
 function folderIds(id){let ids=new Set([id]);let changed=true;while(changed){changed=false;state.folders.forEach(f=>{if(ids.has(f.parent)&&!ids.has(f.id)){ids.add(f.id);changed=true}})}return ids}
-function addFolder(parent=null){let n=prompt(parent?'Nombre de la subcarpeta':'Nombre de la carpeta / equipo');if(!n?.trim())return;checkpoint();let f={id:uid(),name:n.trim(),color:'#007AAD'};if(parent)f.parent=parent;state.folders.push(f);libraryFolder=f.id;if(parent)collapsedFolders.delete(parent);render()}
+
+function addFolder(parent=null){
+ if(activeLibraryRename)activeLibraryRename.finish(false,true);
+ if(libraryDraft)finishPlayName(false,true);
+ if(folderDraft)finishFolderName(false,true);
+ if(parent&&!state.folders.some(f=>f.id===parent))parent=null;
+ folderDraft={parent,name:''};libraryFolder=parent;
+ let f=state.folders.find(f=>f.id===parent),seen=new Set();
+ while(f&&!seen.has(f.id)){seen.add(f.id);collapsedFolders.delete(f.id);f=state.folders.find(p=>p.id===f.parent)}
+ $('search').value='';library();
+ let input=$('library').querySelector('[data-new-folder-name]');if(input){input.focus();input.scrollIntoView({block:'nearest'})}
+}
+function finishFolderName(cancel,passive=false){
+ if(!folderDraft)return;
+ let draft=folderDraft,input=$('library').querySelector('[data-new-folder-name]'),row=input?.closest('.tree-new-folder');
+ if(input)draft.name=input.value;let depth=row?Number(row.style.getPropertyValue('--depth'))||0:0;
+ folderDraft=null;let name=draft.name.trim();
+ if(cancel||!name||(draft.parent&&!state.folders.some(f=>f.id===draft.parent))){if(passive){row?.remove();syncExportSelection()}else library();return}
+ checkpoint();let f={id:uid(),name,color:'#007AAD'};if(draft.parent)f.parent=draft.parent;
+ if(draft.parent)state.folders.push(f);else state.folders.unshift(f);
+ libraryFolder=f.id;
+ if(passive){if(row)row.outerHTML='<div class="folder">'+libraryFolderHeader(f,depth,true)+'<div role="group" class="tree-children"></div></div>';save();syncExportSelection()}
+ else{libraryPicked=new Set(['f:'+f.id]);libraryAnchor='f:'+f.id;render()}
+}
+function libraryFolderDraftRow(depth){
+ return '<div class="row tree-new-folder" style="--depth:'+depth+'"><span class="tree-spacer"></span>'+libraryFolderIcon()+'<input data-new-folder-name class="inline-play-name" aria-label="Nombre de la carpeta" placeholder="Nombre de carpeta" value="'+esc(folderDraft?.name||'')+'" autocomplete="off" maxlength="160"></div>';
+}
+
 
 function libraryColorIcon(type,id,color,icon){
  color=/^#[0-9a-f]{6}$/i.test(color||'')?color:'#007AAD';
@@ -419,23 +464,43 @@ function changeLibraryColor(type,id,color){
  if(!item||item.color===color)return false;
  checkpoint();item.color=color;save();return true;
 }
-function libraryPlayRow(p,rowDepth,folderColor){let depth=rowDepth-1,f={color:folderColor};return '<div class="row play '+(p.id===pid?'current':'')+'" role="treeitem" data-library-key="p:'+esc(p.id)+'" aria-selected="false" style="--depth:'+(depth+1)+'"><span class="tree-spacer"></span>'+libraryColorIcon('play',p.id,p.color||f.color,playIcon)+'<span class="label" data-play="'+esc(p.id)+'" title="'+esc(p.name)+'">'+esc(p.name)+'</span>'+action('data-pdelete',p.id,'Eliminar jugada','×')+'</div>'}
+
+function libraryFolderIcon(){return '<svg class="folder-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 5h8l2 3h10v12H2Z" fill="currentColor"/></svg>'}
+function libraryPlayIcon(){return '<svg class="play-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 2h9l5 5v15H5Z M14 2v6h5"/></svg>'}
+function libraryAction(attr,id,label,icon){return '<button class="tree-action" '+attr+'="'+esc(id)+'" title="'+label+'" aria-label="'+label+'">'+icon+'</button>'}
+function libraryRowForeground(color){
+ if(!/^#[0-9a-f]{6}$/i.test(color||''))return '#FFFFFF';
+ const rgb=[1,3,5].map(i=>parseInt(color.slice(i,i+2),16)/255).map(c=>c<=.04045?c/12.92:Math.pow((c+.055)/1.055,2.4));
+ const l=.2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2];
+ return (l+.05)/(.012+.05) >= 1.05/(l+.05)?'#0C1D32':'#FFFFFF';
+}
+function libraryRowStyle(color,depth){
+ color=/^#[0-9a-f]{6}$/i.test(color||'')?color:'#007AAD';
+ return '--depth:'+depth+';--row-bg:'+color+';--row-fg:'+libraryRowForeground(color);
+}
+function libraryPlayRow(p,rowDepth,folderColor){
+ const color=p.color||folderColor||'#007AAD';
+ return '<div class="row play has-row-color '+(p.id===pid?'current':'')+'" role="treeitem" data-library-key="p:'+esc(p.id)+'" aria-selected="false" style="'+libraryRowStyle(color,rowDepth)+'"><span class="tree-spacer"></span>'+libraryColorIcon('play',p.id,color,libraryPlayIcon())+'<span class="label" data-play="'+esc(p.id)+'" title="'+esc(p.name)+'">'+esc(p.name)+'</span>'+libraryAction('data-pdelete',p.id,'Eliminar jugada','×')+'</div>';
+}
+function libraryFolderHeader(f,depth,open){
+ return '<div class="row folder-row has-row-color '+(libraryFolder===f.id?'folder-selected':'')+'" role="treeitem" data-library-key="f:'+esc(f.id)+'" aria-selected="false" aria-expanded="'+!!open+'" style="'+libraryRowStyle(f.color,depth)+'"><button class="chevron" data-collapse="'+esc(f.id)+'" title="'+(open?'Contraer':'Expandir')+' carpeta"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4L10 8L6 12"/></svg></button>'+libraryColorIcon('folder',f.id,f.color,libraryFolderIcon())+'<span class="label" data-rename-folder="'+esc(f.id)+'" data-collapse="'+esc(f.id)+'" title="'+esc(f.name)+'">'+esc(f.name)+'</span><span class="tree-actions">'+libraryAction('data-addsequence',f.id,'Agregar jugada o drill','+')+'<details class="tree-menu"><summary title="Más opciones">⋯</summary><div>'+libraryAction('data-subfolder',f.id,'Crear subcarpeta','⊞')+libraryAction('data-fname',f.id,'Renombrar carpeta','✎')+libraryAction('data-fdelete',f.id,'Eliminar carpeta','×')+'</div></details></span></div>';
+}
 function library(){
- let query=$('search').value.trim().toLowerCase();
- const folderIcon='<svg class="folder-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 5h8l2 3h10v12H2Z" fill="currentColor"/></svg>';
- const playIcon='<svg class="play-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 2h9l5 5v15H5Z M14 2v6h5"/></svg>';
- const action=(attr,id,label,icon)=>'<button class="tree-action" '+attr+'="'+esc(id)+'" title="'+label+'" aria-label="'+label+'">'+icon+'</button>';
+ const query=$('search').value.trim().toLowerCase();
  function branch(f,depth,ancestors){
-  if(ancestors.has(f.id))return '';let next=new Set(ancestors);next.add(f.id);
-  let ids=folderIds(f.id),all=state.plays.filter(p=>ids.has(p.folder)),direct=state.plays.filter(p=>p.folder===f.id);
-  let children=state.folders.filter(c=>c.parent===f.id),matching=all.some(p=>p.name.toLowerCase().includes(query));
+  if(ancestors.has(f.id))return '';const next=new Set(ancestors);next.add(f.id);
+  const ids=folderIds(f.id),all=state.plays.filter(p=>ids.has(p.folder)),direct=state.plays.filter(p=>p.folder===f.id);
+  const children=state.folders.filter(c=>c.parent===f.id),matching=all.some(p=>p.name.toLowerCase().includes(query));
   if(query&&!f.name.toLowerCase().includes(query)&&!matching&&!children.length)return '';
-  let open=query||!collapsedFolders.has(f.id),checked=all.length&&all.every(p=>selected.has(p.id));
-  let content=direct.filter(p=>!query||p.name.toLowerCase().includes(query)||f.name.toLowerCase().includes(query)).map(p=>libraryPlayRow(p,depth+1,f.color)).join('');
-  return '<div class="folder"><div class="row folder-row '+(libraryFolder===f.id?'folder-selected':'')+'" role="treeitem" data-library-key="f:'+esc(f.id)+'" aria-selected="false" aria-expanded="'+!!open+'" style="--depth:'+depth+'"><button class="chevron" data-collapse="'+esc(f.id)+'" title="'+(open?'Contraer':'Expandir')+' carpeta">'+'<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4L10 8L6 12"/></svg>'+'</button>'+libraryColorIcon('folder',f.id,f.color,folderIcon)+'<span class="label" data-rename-folder="'+esc(f.id)+'" data-collapse="'+esc(f.id)+'" title="'+esc(f.name)+'">'+esc(f.name)+'</span><span class="tree-actions">'+action('data-addsequence',f.id,'Agregar jugada o drill','+')+'<details class="tree-menu"><summary title="Más opciones">⋯</summary><div>'+action('data-subfolder',f.id,'Crear subcarpeta','⊞')+action('data-fname',f.id,'Renombrar carpeta','✎')+''+action('data-fdelete',f.id,'Eliminar carpeta','×')+'</div></details></span></div>'+(open?'<div role="group" class="tree-children">'+(libraryDraft?.folder===f.id?'<div class="row play tree-new-play" style="--depth:'+(depth+1)+'"><span class="tree-spacer"></span>'+playIcon+'<input data-new-play-name class="inline-play-name" aria-label="Nombre de la jugada o drill" placeholder="Nombre de jugada o drill" value="'+esc(libraryDraft.name)+'" autocomplete="off" maxlength="160"></div>':'')+children.map(c=>branch(c,depth+1,next)).join('')+content+'</div>':'')+'</div>';
+  const open=!!query||!collapsedFolders.has(f.id);
+  const content=direct.filter(p=>!query||p.name.toLowerCase().includes(query)||f.name.toLowerCase().includes(query)).map(p=>libraryPlayRow(p,depth+1,f.color)).join('');
+  const draftFolder=folderDraft?.parent===f.id?libraryFolderDraftRow(depth+1):'';
+  const draftPlay=libraryDraft?.folder===f.id?'<div class="row play tree-new-play" style="--depth:'+(depth+1)+'"><span class="tree-spacer"></span>'+libraryPlayIcon()+'<input data-new-play-name class="inline-play-name" aria-label="Nombre de la jugada o drill" placeholder="Nombre de jugada o drill" value="'+esc(libraryDraft.name)+'" autocomplete="off" maxlength="160"></div>':'';
+  return '<div class="folder">'+libraryFolderHeader(f,depth,open)+(open?'<div role="group" class="tree-children">'+draftFolder+draftPlay+children.map(c=>branch(c,depth+1,next)).join('')+content+'</div>':'')+'</div>';
  }
- let roots=state.folders.filter(f=>!f.parent||!state.folders.some(p=>p.id===f.parent));
- $('library').innerHTML=roots.map(f=>branch(f,0,new Set())).join('')||'<p class="tree-empty">Sin resultados</p>';
+ const roots=state.folders.filter(f=>!f.parent||!state.folders.some(p=>p.id===f.parent));
+ const draft=folderDraft&&!folderDraft.parent?libraryFolderDraftRow(0):'';
+ $('library').innerHTML=draft+roots.map(f=>branch(f,0,new Set())).join('')||'<p class="tree-empty">Sin resultados</p>';
  syncExportSelection();
 }
 
@@ -614,6 +679,10 @@ function installInlineRenaming(root){
 function leaveLibraryFolder(ev){
  if(ev.button!==0)return;
  const root=$('library'),target=ev.target;
+ if(folderDraft){
+  const input=root.querySelector('[data-new-folder-name]');
+  if(!input?.closest('.tree-new-folder')?.contains(target)){if(input)folderDraft.name=input.value;finishFolderName(false,true)}
+ }
  let rename=activeLibraryRename;
  if(rename&&!rename.input.closest('.row')?.contains(target))rename.finish(false,true);
  if(libraryDraft){
@@ -629,6 +698,15 @@ function leaveLibraryFolder(ev){
  }
 }
 document.addEventListener('pointerdown',leaveLibraryFolder,true);
+
+
+$('library').addEventListener('input',ev=>{if(ev.target.matches('[data-new-folder-name]')&&folderDraft)folderDraft.name=ev.target.value});
+$('library').addEventListener('keydown',ev=>{
+ if(!ev.target.matches('[data-new-folder-name]'))return;ev.stopImmediatePropagation();if(ev.isComposing)return;
+ if(ev.key==='Enter'){ev.preventDefault();if(folderDraft)folderDraft.name=ev.target.value;finishFolderName(false)}
+ if(ev.key==='Escape'){ev.preventDefault();finishFolderName(true)}
+});
+$('library').addEventListener('focusout',ev=>{if(ev.target.matches('[data-new-folder-name]')&&folderDraft){folderDraft.name=ev.target.value;finishFolderName(false,true)}});
 
 installLibrarySelection();installInlineRenaming($('steps'));
 
