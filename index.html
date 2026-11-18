@@ -802,10 +802,12 @@ function libraryFolderDraftRow(depth){
 function libraryColorIcon(type,id,color,icon){return '<span class="tree-item-icon" aria-hidden="true">'+icon+'</span>'}
 
 function changeLibraryColor(type,id,color){
- if(!/^#[0-9a-f]{6}$/i.test(color))return false;
+ if(color!==null&&!/^#[0-9a-f]{6}$/i.test(color))return false;
  let item=(type==='folder'?state.folders:state.plays).find(x=>x.id===id);
  if(!item||item.color===color)return false;
- checkpoint();item.color=color;save();return true;
+ checkpoint();
+ if(color===null)delete item.color;else item.color=color;
+ save();return true;
 }
 
 function libraryFolderIcon(){return '<svg class="folder-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 5h8l2 3h10v12H2Z" fill="currentColor"/></svg>'}
@@ -839,7 +841,8 @@ function libraryPlayRow(p,rowDepth){
  return '<div class="row play '+(color?'has-row-color ':'')+(p.id===pid?'current':'')+'" role="treeitem" data-library-key="p:'+esc(p.id)+'" aria-selected="false" style="'+(color?libraryRowStyle(color,rowDepth):'--depth:'+rowDepth)+'">'+'<span class="tree-spacer"></span>'+libraryDragHandle('p:'+p.id)+libraryColorIcon('play',p.id,color,libraryPlayIcon())+'<span class="label" data-play="'+esc(p.id)+'" title="'+esc(p.name)+'">'+esc(p.name)+'</span>'+'<span class="tree-actions"><details class="tree-menu"><summary title="Más opciones">⋯</summary><div>'+libraryAction('data-pname',p.id,'Renombrar jugada','✎')+libraryAction('data-colorplay',p.id,'Cambiar color',libraryMenuColor(p.color))+libraryAction('data-pdelete',p.id,'Eliminar jugada','×')+'</div></details></span>'+'</div>';
 }
 function libraryFolderHeader(f,depth,open){
- return '<div class="row folder-row has-row-color '+(libraryFolder===f.id?'folder-selected':'')+'" role="treeitem" data-library-key="f:'+esc(f.id)+'" aria-selected="false" aria-expanded="'+!!open+'" style="'+libraryRowStyle(f.color,depth)+'">'+libraryDragHandle('f:'+f.id)+'<button class="chevron" data-collapse="'+esc(f.id)+'" title="'+(open?'Contraer':'Expandir')+' carpeta"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4L10 8L6 12"/></svg></button>'+libraryColorIcon('folder',f.id,f.color,libraryFolderIcon())+'<span class="label" data-rename-folder="'+esc(f.id)+'" data-collapse="'+esc(f.id)+'" title="'+esc(f.name)+'">'+esc(f.name)+'</span><span class="tree-actions">'+libraryAction('data-addsequence',f.id,'Agregar jugada o drill','+')+'<details class="tree-menu"><summary title="Más opciones">⋯</summary><div>'+libraryAction('data-subfolder',f.id,'Crear subcarpeta',libraryFolderIcon())+libraryAction('data-fname',f.id,'Renombrar carpeta','✎')+libraryAction('data-colorfolder',f.id,'Cambiar color',libraryMenuColor(f.color))+libraryAction('data-fdelete',f.id,'Eliminar carpeta','×')+'</div></details></span></div>';
+ const color=normalizeLibraryColor(f.color);
+ return '<div class="row folder-row '+(color?'has-row-color ':'')+(libraryFolder===f.id?'folder-selected':'')+'" role="treeitem" data-library-key="f:'+esc(f.id)+'" aria-selected="false" aria-expanded="'+!!open+'" style="'+(color?libraryRowStyle(color,depth):'--depth:'+depth)+'">'+libraryDragHandle('f:'+f.id)+'<button class="chevron" data-collapse="'+esc(f.id)+'" title="'+(open?'Contraer':'Expandir')+' carpeta"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4L10 8L6 12"/></svg></button>'+libraryColorIcon('folder',f.id,f.color,libraryFolderIcon())+'<span class="label" data-rename-folder="'+esc(f.id)+'" data-collapse="'+esc(f.id)+'" title="'+esc(f.name)+'">'+esc(f.name)+'</span><span class="tree-actions">'+libraryAction('data-addsequence',f.id,'Agregar jugada o drill','+')+'<details class="tree-menu"><summary title="Más opciones">⋯</summary><div>'+libraryAction('data-subfolder',f.id,'Crear subcarpeta',libraryFolderIcon())+libraryAction('data-fname',f.id,'Renombrar carpeta','✎')+libraryAction('data-colorfolder',f.id,'Cambiar color',libraryMenuColor(f.color))+libraryAction('data-fdelete',f.id,'Eliminar carpeta','×')+'</div></details></span></div>';
 }
 function library(){
  const query=$('search').value.trim().toLowerCase();
@@ -1221,7 +1224,7 @@ function openLibraryPalette(type,id,anchor){
  const current=normalizeLibraryColor(item.color);
  libraryPaletteTarget={type,id};
  const popup=document.createElement('div');popup.id='library-color-popup';popup.className='library-color-popup';popup.setAttribute('role','dialog');popup.setAttribute('aria-label','Cambiar color de fila');
- popup.innerHTML='<header><strong>Color de fila</strong><button type="button" data-palette-close aria-label="Cerrar paleta">×</button></header><p class="palette-item-name">'+esc(item.name)+'</p><p class="palette-caption">Colores</p><div class="library-color-grid">'+paletteSwatches(libraryPaletteColors(),current)+'</div><p class="palette-caption">Colores recientes</p><div class="library-color-grid palette-recents">'+paletteSwatches(recentLibraryColors(),current)+'</div><label class="palette-custom">Personalizado<input id="library-custom-color" aria-label="Color hexadecimal" value="'+(current||'#007AAD')+'" maxlength="7" spellcheck="false"><button type="button" data-palette-custom>Aplicar</button></label><p class="palette-error" role="alert"></p><small>Se aplica como un tono suave a toda la fila.</small>';
+ popup.innerHTML='<header><strong>Color de fila</strong><button type="button" data-palette-close aria-label="Cerrar paleta">×</button></header><p class="palette-item-name">'+esc(item.name)+'</p><p class="palette-caption">Colores</p><div class="library-color-grid">'+paletteSwatches(libraryPaletteColors(),current)+'</div><p class="palette-caption">Colores recientes</p><div class="library-color-grid palette-recents">'+paletteSwatches(recentLibraryColors(),current)+'</div><label class="palette-custom">Personalizado<input id="library-custom-color" aria-label="Color hexadecimal" value="'+(current||'#007AAD')+'" maxlength="7" spellcheck="false"><button type="button" data-palette-custom>Aplicar</button></label><p class="palette-error" role="alert"></p><p class="palette-caption">Color base: '+(current||'Sin color')+'</p>'+(type==='folder'?'<button type="button" data-palette-clear '+(current?'':'disabled')+'>Quitar color</button><small>Fondo sin color: '+(state.theme==='light'?'#D9E2E9':'fondo de la biblioteca')+'.</small>':'')+'<small>El color se aplica como un tono suave a toda la fila.</small>';
  $('app-frame').append(popup);
  const frame=$('app-frame'),fr=frame.getBoundingClientRect(),r=anchor.getBoundingClientRect(),scale=fr.width/1672,width=332;
  let left=(r.right-fr.left)/scale+8,top=(r.top-fr.top)/scale;
@@ -1230,6 +1233,9 @@ function openLibraryPalette(type,id,anchor){
  popup.querySelector('.library-color-swatch')?.focus({preventScroll:true});
  popup.onclick=ev=>{
   if(ev.target.closest('[data-palette-close]')){closeLibraryPalette();return}
+  if(ev.target.closest('[data-palette-clear]')){
+   changeLibraryColor(type,id,null);closeLibraryPalette();library();return;
+  }
   let swatch=ev.target.closest('[data-library-color]');
   if(swatch){applyLibraryPaletteColor(swatch.dataset.libraryColor);return}
   if(ev.target.closest('[data-palette-custom]'))applyLibraryPaletteColor($('library-custom-color').value);
