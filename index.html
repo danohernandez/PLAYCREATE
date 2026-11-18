@@ -346,14 +346,6 @@ body:not(.light) .court-text-format button:hover,body:not(.light) .court-text-fo
 body:not(.light) .shape-tool-menu{background:#142738;color:#FFFBFC}
 body:not(.light) .shape-tool-menu button:hover,body:not(.light) .shape-tool-menu button[aria-checked="true"]{background:#31475B}
 
-#annotation-options.shape-color-bubble{width:42px;height:42px;padding:5px;border-radius:8px;z-index:65}
-.shape-current-color{display:flex;align-items:center;justify-content:center;width:30px;height:30px;padding:3px;border:0;background:transparent;border-radius:50%;cursor:pointer}
-.shape-current-color span{display:block;width:23px;height:23px;border-radius:50%;background:var(--shape-color);border:1px solid #0C1D3240}
-.shape-current-color:hover,.shape-current-color[aria-expanded="true"]{box-shadow:0 0 0 1px #007AAD}
-.shape-color-grid{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);display:grid;grid-template-columns:repeat(2,26px);gap:8px;padding:9px;background:#FFFBFC;border:1px solid #B7C5CF;border-radius:8px;box-shadow:0 4px 12px #0C1D3220}
-.shape-color-grid button{width:26px;height:26px;min-width:26px;padding:0;border:1px solid #0C1D3240;border-radius:50%;cursor:pointer}
-.shape-color-grid button:hover{outline:2px solid #007AAD;outline-offset:2px}
-body:not(.light) .shape-color-grid{background:#142738;border-color:#607589}
 </style><div id="app-frame"><header class="top"><div class="brand"><img src="/PLAYCREATE/icon-192-flat.png" width="46" height="46" style="border-radius:10px" alt="Logo Design Play">DESIGN PLAY</div><h1 id="title" class="work-title" aria-label="Jugada o drill actual" aria-live="polite"></h1><span id="save">Guardado</span><button class="head-action undo" onclick="undo()" title="Deshacer">↶</button><button class="head-action redo" onclick="redo()" title="Rehacer">↷</button><button class="head-action theme" onclick="theme()" title="Tema claro u oscuro">☀</button><button class="primary export-button" onclick="exportDialog()">⇧ Exportar PDF</button></header><div class="layout"><aside><h3 class="library-title">BIBLIOTECA</h3><input id="search" placeholder="⌕   Buscar jugadas..." oninput="library()"><button class="new-play create-folder-text" onclick="addFolder()">+ Crear carpeta</button><div class="library" id="library" role="tree" aria-multiselectable="true" aria-label="Carpetas y jugadas"></div><div class="utility"><button onclick="backup()">Respaldo</button><button onclick="$('file').click()">Importar</button></div><span id="count" hidden></span><input hidden id="file" type="file" accept=".json"></aside><main><div class="tools" id="tools" aria-label="Herramientas de dibujo"></div><div class="toolbar"><button id="half" onclick="setCourt(false)">⚿　Media cancha</button><button id="full" onclick="setCourt(true)">⚿　Cancha completa</button><select hidden id="lineShape"><option value="straight">Recta</option></select><span hidden id="zoomValue">100 %</span></div><div class="drawing-tip" id="drawingTip">Elige una acción y arrastra. Para curvar, mueve el punto celeste. Balón: toca al jugador que lo tiene.</div><div class="court-space"><div class="board"><svg id="court" xmlns="http://www.w3.org/2000/svg"></svg></div></div><section class="sequence-column" aria-label="Secuencias de la jugada"><h3 class="sequence-title">SECUENCIA</h3><div id="steps" class="strip"></div></section><textarea id="notes" class="notes" placeholder="Notas de este paso…"></textarea></main><aside hidden><h3 class="properties-title">PROPIEDADES</h3><div class="props"><label>Color:<span class="palette"><input type="color" id="color" value="#0066ff"><button class="swatch" style="background:#0050d7" onclick="chooseColor('#0050d7')"></button><button class="swatch" style="background:#71aff5" onclick="chooseColor('#71aff5')"></button><button class="swatch" style="background:#b5d9fc" onclick="chooseColor('#b5d9fc')"></button><button class="swatch" style="background:#fff" onclick="chooseColor('#ffffff')"></button></span></label><label>Tamaño:<input id="size" type="range" min="12" max="32" value="26"></label><label>Número:<input id="number" value="1" aria-label="Número o texto"></label><div><label>Grosor de línea:<input hidden id="width" type="range" min="2" max="8" value="4"></label><div class="width-buttons"><button onclick="chooseWidth(2)">―</button><button onclick="chooseWidth(4)">━</button><button onclick="chooseWidth(7)">▬</button></div></div></div><div class="element-more"><button onclick="applyTeam('player')">Color ataque</button><button onclick="applyTeam('defender')">Color defensa</button><button onclick="duplicateElement()">Duplicar ficha</button><button onclick="straightenLine()" title="Selecciona una línea y arrastra el círculo central para curvarla">Enderezar línea</button><button onclick="duplicateStep()">Duplicar paso</button><button onclick="renameStep()">Renombrar paso</button><button onclick="deleteStep()">Eliminar paso</button></div><span id="hint" hidden></span></aside></div><footer class="bottom"><strong id="stepStatus"></strong><span><kbd>← →</kbd>Cambiar paso</span><span title="Ctrl + C copia el paso actual; Ctrl + V agrega la copia"><kbd>Ctrl + C / V</kbd>Copiar / Pegar paso</span><span><kbd>Supr</kbd>Borrar selección</span><span><kbd>Ctrl + Z</kbd>Deshacer</span><span><kbd>Ctrl + Y</kbd>Rehacer</span><span><kbd>Ctrl + E</kbd>Exportar</span></footer><div id="export" class="export-pop" hidden><button class="close-pop" onclick="$('export').hidden=true">×</button><h2>♧ Exportar selección</h2><small style="font-size:12px">Carpetas y jugadas seleccionadas</small><p id="exportInfo"></p><p>Exporta en un único PDF una o varias carpetas completas o jugadas individuales.</p><hr><label><input type="checkbox" checked disabled>Incluir todos los pasos</label><select id="perpage"><option value="1">1 paso por página</option><option value="2">2 pasos por página</option></select><button class="primary" onclick="printPDF()">⇧ Generar PDF</button></div></div><script>
 function closeDrawers(){document.querySelector('.layout').classList.remove('library-open','tools-open')}function toggleDrawer(name){let el=document.querySelector('.layout'),open=el.classList.contains(name+'-open');closeDrawers();if(!open)el.classList.add(name+'-open')}
 const $=id=>document.getElementById(id), uid=()=>crypto.randomUUID(), clone=x=>JSON.parse(JSON.stringify(x)), esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -379,7 +371,7 @@ function render(){if($('stepStatus'))$('stepStatus').textContent=play().id?'Paso
 
 const toolPaths={highlight:'<circle cx="9" cy="9" r="6"/><rect x="10" y="10" width="11" height="11" rx="1"/>',cone:'<path d="M12 3L19 19H5Z M4 19H20L22 22H2Z"/><path d="M9.5 9H14.5M7.5 14H16.5"/>',select:'<path d="M5 3L19 14L12 15L9 22Z" fill="currentColor"/>',player:'<circle cx="12" cy="12" r="9"/><text x="12" y="16" text-anchor="middle" font-size="12" fill="currentColor" stroke="none">1</text>',defender:'<path d="M5 5L19 19M19 5L5 19"/>',ball:'<g transform="translate(12 12) rotate(-20)"><circle r="9" stroke-width="1.7"/><path d="M-9 0H9M0-9V9M-6.364-6.364C-2.52-4.32-2.52 4.32-6.364 6.364M6.364-6.364C2.52-4.32 2.52 4.32 6.364 6.364" stroke-width="1.2"/></g>',move:'<path d="M3 20Q5 5 20 5M14 2L21 5L18 12"/>',pass:'<path d="M2 12H19" stroke-dasharray="3 3"/><path d="M15 6L21 12L15 18"/>',dribble:'<path d="M2 12C3.5 4 5.5 4 7 12S10.5 20 12 12S15.5 4 17 12C17.5 14.5 18.5 16 21 12M17.5 10.5L21.5 12L20 16"/>',screen:'<path d="M3 12H19M19 4V20"/>',text:'<path d="M4 5V3H20V5M12 3V21M8 21H16"/>',delete:'<path d="M4 6H20M9 6V3H15V6M6 6L7 21H17L18 6M10 10V17M14 10V17"/>'};
 function toolIcon(id){if(id==='highlight')return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">'+(annotationKind==='zone'?'<rect x="4" y="4" width="16" height="16" rx=".5"/>':'<circle cx="12" cy="12" r="8"/>')+'</svg>';return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+toolPaths[id]+'</svg>'}
-const toolList=[['select','↖ Seleccionar'],['player','● Jugador'],['defender','X1 Defensor'],['ball','◉ Balón'],['cone','△ Conos'],['move','↗ Movimiento'],['pass','⇢ Pase'],['dribble','〰 Bote'],['screen','⊥ Bloqueo'],['text','T Texto'],['highlight','◎ Resaltar'],['delete','⌫ Borrar']];function setTool(t,options={}){if(t!==tool){lineDraft=null;marquee=null;editorSelection.clear();focus=null}tool=t;$('court').style.cursor=t==='select'?'default':t==='text'?'text':'crosshair';$('court').dataset.tool=t;closeCourtTextFormat();closeShapeToolMenu();if(t!=='select')closeDrawers();if(options.keepTools){$('tools').querySelectorAll('[data-tool]').forEach(button=>button.classList.toggle('active',button.dataset.tool===t))}else $('tools').innerHTML=toolList.map(([id,label])=>'<button class="'+(id===t?'active':'')+'" data-tool="'+id+'" title="'+label.replace(/^[^ ]+ /,'')+({text:' (T)',select:' (A)',player:' (O)',defender:' (D)',ball:' (B)',cone:' (C)',highlight:' (R)'}[id]||'')+'" aria-label="'+label.replace(/^[^ ]+ /,'')+'">'+toolIcon(id)+(id==='highlight'?'<i class="shape-tool-caret" data-shape-picker aria-hidden="true"></i>':'')+'<span>'+label.replace(/^[^ ]+ /,'')+'</span></button>').join('');renderAnnotationOptions();$('hint').textContent=t==='select'?'Arrastra un elemento o selecciona varios con un recuadro. Suprimir borra la selección.':'Haz clic para colocar. Para líneas, clic en A y después en B; arrastra el círculo central para curvar.'}
+const toolList=[['select','↖ Seleccionar'],['player','● Jugador'],['defender','X1 Defensor'],['ball','◉ Balón'],['cone','△ Conos'],['move','↗ Movimiento'],['pass','⇢ Pase'],['dribble','〰 Bote'],['screen','⊥ Bloqueo'],['text','T Texto'],['highlight','◎ Resaltar'],['delete','⌫ Borrar']];function setTool(t,options={}){shapePaletteVisibleId=null;if(t!==tool){lineDraft=null;marquee=null;editorSelection.clear();focus=null}tool=t;$('court').style.cursor=t==='select'?'default':t==='text'?'text':'crosshair';$('court').dataset.tool=t;closeCourtTextFormat();closeShapeToolMenu();if(t!=='select')closeDrawers();if(options.keepTools){$('tools').querySelectorAll('[data-tool]').forEach(button=>button.classList.toggle('active',button.dataset.tool===t))}else $('tools').innerHTML=toolList.map(([id,label])=>'<button class="'+(id===t?'active':'')+'" data-tool="'+id+'" title="'+label.replace(/^[^ ]+ /,'')+({text:' (T)',select:' (A)',player:' (O)',defender:' (D)',ball:' (B)',cone:' (C)',highlight:' (R)'}[id]||'')+'" aria-label="'+label.replace(/^[^ ]+ /,'')+'">'+toolIcon(id)+(id==='highlight'?'<i class="shape-tool-caret" data-shape-picker aria-hidden="true"></i>':'')+'<span>'+label.replace(/^[^ ]+ /,'')+'</span></button>').join('');renderAnnotationOptions();$('hint').textContent=t==='select'?'Arrastra un elemento o selecciona varios con un recuadro. Suprimir borra la selección.':'Haz clic para colocar. Para líneas, clic en A y después en B; arrastra el círculo central para curvar.'}
 function coords(ev){let pt=$('court').createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;let p=pt.matrixTransform($('court').getScreenCTM().inverse());return{x:Math.max(25,Math.min(575,p.x/(play().full?1:1.4))),y:Math.max(25,Math.min(play().full?1035:535,p.y))}}
 
 function isLineTool(t){return ['move','pass','dribble','screen'].includes(t)}
@@ -396,7 +388,7 @@ function commitDraftLine(p){
  step().elements.push(e);focus=e.id;editorSelection=new Set([e.id]);lineDraft=null;drag=null;render();return true;
 }
 $('court').onpointerdown=ev=>{
- if(ev.button!==0||!play().id)return;ev.preventDefault();hiddenShapePalette=null;shapePaletteExpanded=false;
+ if(ev.button!==0||!play().id)return;ev.preventDefault();shapePaletteVisibleId=null;
  if(document.activeElement.closest('#steps [data-step]'))document.activeElement.blur();
  let p=coords(ev),id=ev.target.closest('[data-id]')?.dataset.id,handle=ev.target.dataset.handle;
  const clickedText=step().elements.find(e=>e.id===id&&e.type==='text');
@@ -416,6 +408,7 @@ $('court').onpointerdown=ev=>{
  }
  const clickedShape=step().elements.find(e=>e.id===id&&e.type==='highlight');
  if(tool==='highlight'&&(clickedShape||selectedCourtShape()))setTool('select',{keepTools:true});
+ if(clickedShape&&tool==='select'&&!ev.shiftKey){const now=Date.now(),previous=lastCourtShapeClick;lastCourtShapeClick={id,time:now};if(previous?.id===id&&now-previous.time<450){shapePaletteVisibleId=id;lastCourtShapeClick=null}}else lastCourtShapeClick=null;
  if(handle&&(tool==='select'||isLineTool(tool))){
   let e=step().elements.find(e=>e.id===focus);if(e?.ex!=null){drag={mode:'handle',id:e.id,handle,original:clone(e),start:p,changed:false};$('court').setPointerCapture(ev.pointerId);return}
  }
@@ -1109,7 +1102,7 @@ function installLibraryReordering(){
 }
 
 
-var annotationColor='#E45454',annotationKind='circle',courtTextColor='#0C1D32',courtTextSize=20,courtTextBold=false,activeCourtText=null,courtTextFormatOpen=false,lastCourtTextClick=null,shapePaletteExpanded=false,hiddenShapePalette=null,shapePaletteOwner=null;
+var annotationColor='#E45454',annotationKind='circle',courtTextColor='#0C1D32',courtTextSize=20,courtTextBold=false,activeCourtText=null,courtTextFormatOpen=false,lastCourtTextClick=null,shapePaletteVisibleId=null,lastCourtShapeClick=null;
 
 function selectedCourtText(){const e=step().elements.find(e=>e.id===focus);return e?.type==='text'?e:null}
 function closeShapeToolMenu(){
@@ -1133,31 +1126,26 @@ function selectedCourtShape(){
  return e?.type==='highlight'&&editorSelection.size<=1?e:null;
 }
 function hideShapePaletteForDrag(){
- const shape=selectedCourtShape();if(!shape)return;
- hiddenShapePalette=shape.id;shapePaletteExpanded=false;
+ if(!selectedCourtShape())return;
+ shapePaletteVisibleId=null;lastCourtShapeClick=null;
  const box=document.getElementById('annotation-options');if(box)box.hidden=true;
 }
 function renderAnnotationOptions(){
- let box=$('annotation-options');if(!box){box=document.createElement('div');box.id='annotation-options';box.className='annotation-options shape-color-bubble'}
+ let box=$('annotation-options');if(!box){box=document.createElement('div');box.id='annotation-options';box.className='annotation-options'}
  const shape=selectedCourtShape();
- if(shapePaletteOwner!==shape?.id){shapePaletteOwner=shape?.id||null;shapePaletteExpanded=false}
- box.hidden=!(shape&&(tool==='select'||tool==='highlight')&&hiddenShapePalette!==shape.id);
+ box.hidden=!(shape&&(tool==='select'||tool==='highlight')&&shapePaletteVisibleId===shape.id);
  if(box.hidden)return;
- const colors=['#E45454','#E99A21','#007AAD','#259763','#875AC7','#0C1D32'].filter(c=>c!==shape.color);
- box.innerHTML='<button type="button" class="shape-current-color" data-shape-color-toggle style="--shape-color:'+esc(shape.color)+'" aria-label="Cambiar color de la figura" aria-expanded="'+shapePaletteExpanded+'"><span></span></button>'+(shapePaletteExpanded?'<div class="shape-color-grid" role="group" aria-label="Colores de la figura">'+colors.map(c=>'<button type="button" data-annotation-color="'+c+'" style="background:'+c+'" aria-label="Color '+c+'"></button>').join('')+'</div>':'');
+ box.innerHTML='<div class="annotation-colors">'+['#E45454','#E99A21','#007AAD','#259763','#875AC7','#0C1D32'].map(c=>'<button type="button" data-annotation-color="'+c+'" style="background:'+c+'" class="'+(shape.color===c?'chosen':'')+'" aria-label="Color '+c+'" aria-pressed="'+(shape.color===c)+'"></button>').join('')+'</div>';
  $('app-frame').append(box);
  const t=projection(play().full),pt=$('court').createSVGPoint();pt.x=shape.x*t.sx+t.ox;pt.y=(shape.y-(shape.ry||40))*t.sy+t.oy;
- const pos=pt.matrixTransform($('court').getScreenCTM()),frame=$('app-frame').getBoundingClientRect(),scale=frame.width/1672;
- box.style.left=Math.max(38,Math.min(1672-80,(pos.x-frame.left)/scale-21))+'px';
- const top=(pos.y-frame.top)/scale,gridHeight=shapePaletteExpanded?Math.ceil(colors.length/2)*34+18:0;
- box.style.top=Math.max(gridHeight+8,top-54)+'px';
+ const pos=pt.matrixTransform($('court').getScreenCTM()),frame=$('app-frame').getBoundingClientRect(),scale=frame.width/1672,width=box.offsetWidth||246,height=box.offsetHeight||56;
+ box.style.left=Math.max(8,Math.min(1672-width-8,(pos.x-frame.left)/scale-width/2))+'px';
+ box.style.top=Math.max(8,(pos.y-frame.top)/scale-height-12)+'px';
  box.onpointerdown=ev=>ev.preventDefault();
  box.onclick=ev=>{
-  if(ev.target.closest('[data-shape-color-toggle]')){shapePaletteExpanded=!shapePaletteExpanded;renderAnnotationOptions();return}
-  const color=ev.target.closest('[data-annotation-color]')?.dataset.annotationColor;
-  if(!color)return;
-  annotationColor=color;shapePaletteExpanded=false;
-  const current=selectedCourtShape();if(current&&current.color!==color){checkpoint();current.color=color;render({keepLibrary:true})}else renderAnnotationOptions();
+  const color=ev.target.closest('[data-annotation-color]')?.dataset.annotationColor;if(!color)return;
+  annotationColor=color;const current=selectedCourtShape();
+  if(current&&current.color!==color){checkpoint();current.color=color;render({keepLibrary:true})}else renderAnnotationOptions();
  };
 }
 function closeCourtTextFormat(){courtTextFormatOpen=false;const box=document.getElementById('court-text-format');if(box)box.hidden=true}
