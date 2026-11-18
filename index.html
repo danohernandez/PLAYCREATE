@@ -359,7 +359,7 @@ function render(){if($('stepStatus'))$('stepStatus').textContent=play().id?'Paso
 
 const toolPaths={highlight:'<circle cx="9" cy="9" r="6"/><rect x="10" y="10" width="11" height="11" rx="1"/>',cone:'<path d="M12 3L19 19H5Z M4 19H20L22 22H2Z"/><path d="M9.5 9H14.5M7.5 14H16.5"/>',select:'<path d="M5 3L19 14L12 15L9 22Z" fill="currentColor"/>',player:'<circle cx="12" cy="12" r="9"/><text x="12" y="16" text-anchor="middle" font-size="12" fill="currentColor" stroke="none">1</text>',defender:'<path d="M5 5L19 19M19 5L5 19"/>',ball:'<g transform="translate(12 12) rotate(-20)"><circle r="9" stroke-width="1.7"/><path d="M-9 0H9M0-9V9M-6.364-6.364C-2.52-4.32-2.52 4.32-6.364 6.364M6.364-6.364C2.52-4.32 2.52 4.32 6.364 6.364" stroke-width="1.2"/></g>',move:'<path d="M3 20Q5 5 20 5M14 2L21 5L18 12"/>',pass:'<path d="M2 12H19" stroke-dasharray="3 3"/><path d="M15 6L21 12L15 18"/>',dribble:'<path d="M2 12C3.5 4 5.5 4 7 12S10.5 20 12 12S15.5 4 17 12C17.5 14.5 18.5 16 21 12M17.5 10.5L21.5 12L20 16"/>',screen:'<path d="M3 12H19M19 4V20"/>',text:'<path d="M4 5V3H20V5M12 3V21M8 21H16"/>',delete:'<path d="M4 6H20M9 6V3H15V6M6 6L7 21H17L18 6M10 10V17M14 10V17"/>'};
 function toolIcon(id){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+toolPaths[id]+'</svg>'}
-const toolList=[['select','↖ Seleccionar'],['player','● Jugador'],['defender','X1 Defensor'],['ball','◉ Balón'],['cone','△ Conos'],['move','↗ Movimiento'],['pass','⇢ Pase'],['dribble','〰 Bote'],['screen','⊥ Bloqueo'],['text','T Texto'],['highlight','◎ Resaltar'],['delete','⌫ Borrar']];function setTool(t,options={}){if(t!==tool){lineDraft=null;marquee=null;editorSelection.clear();focus=null}tool=t;$('court').style.cursor=t==='select'?'default':t==='text'?'text':'crosshair';$('court').dataset.tool=t;closeCourtTextFormat();if(t!=='select')closeDrawers();if(options.keepTools){$('tools').querySelectorAll('[data-tool]').forEach(button=>button.classList.toggle('active',button.dataset.tool===t))}else $('tools').innerHTML=toolList.map(([id,label])=>'<button class="'+(id===t?'active':'')+'" data-tool="'+id+'" title="'+label.replace(/^[^ ]+ /,'')+'" aria-label="'+label.replace(/^[^ ]+ /,'')+'">'+toolIcon(id)+'<span>'+label.replace(/^[^ ]+ /,'')+'</span></button>').join('');renderAnnotationOptions();$('hint').textContent=t==='select'?'Arrastra un elemento o selecciona varios con un recuadro. Suprimir borra la selección.':'Haz clic para colocar. Para líneas, clic en A y después en B; arrastra el círculo central para curvar.'}
+const toolList=[['select','↖ Seleccionar'],['player','● Jugador'],['defender','X1 Defensor'],['ball','◉ Balón'],['cone','△ Conos'],['move','↗ Movimiento'],['pass','⇢ Pase'],['dribble','〰 Bote'],['screen','⊥ Bloqueo'],['text','T Texto'],['highlight','◎ Resaltar'],['delete','⌫ Borrar']];function setTool(t,options={}){if(t!==tool){lineDraft=null;marquee=null;editorSelection.clear();focus=null}tool=t;$('court').style.cursor=t==='select'?'default':t==='text'?'text':'crosshair';$('court').dataset.tool=t;closeCourtTextFormat();if(t!=='select')closeDrawers();if(options.keepTools){$('tools').querySelectorAll('[data-tool]').forEach(button=>button.classList.toggle('active',button.dataset.tool===t))}else $('tools').innerHTML=toolList.map(([id,label])=>'<button class="'+(id===t?'active':'')+'" data-tool="'+id+'" title="'+label.replace(/^[^ ]+ /,'')+({text:' (T)',select:' (A)',player:' (O)',defender:' (D)',ball:' (B)',cone:' (C)'}[id]||'')+'" aria-label="'+label.replace(/^[^ ]+ /,'')+'">'+toolIcon(id)+'<span>'+label.replace(/^[^ ]+ /,'')+'</span></button>').join('');renderAnnotationOptions();$('hint').textContent=t==='select'?'Arrastra un elemento o selecciona varios con un recuadro. Suprimir borra la selección.':'Haz clic para colocar. Para líneas, clic en A y después en B; arrastra el círculo central para curvar.'}
 function coords(ev){let pt=$('court').createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;let p=pt.matrixTransform($('court').getScreenCTM().inverse());return{x:Math.max(25,Math.min(575,p.x/(play().full?1:1.4))),y:Math.max(25,Math.min(play().full?1035:535,p.y))}}
 
 function isLineTool(t){return ['move','pass','dribble','screen'].includes(t)}
@@ -394,6 +394,8 @@ $('court').onpointerdown=ev=>{
   let e=step().elements.find(e=>e.id===resizeId&&e.type==='highlight');
   if(e){focus=e.id;editorSelection=new Set([e.id]);drag={mode:'highlightResize',id:e.id,handle:resizeSide,original:clone(e),start:p,changed:false};$('court').setPointerCapture(ev.pointerId);return}
  }
+ const clickedShape=step().elements.find(e=>e.id===id&&e.type==='highlight');
+ if(tool==='highlight'&&(clickedShape||selectedCourtShape()))setTool('select',{keepTools:true});
  if(handle&&(tool==='select'||isLineTool(tool))){
   let e=step().elements.find(e=>e.id===focus);if(e?.ex!=null){drag={mode:'handle',id:e.id,handle,original:clone(e),start:p,changed:false};$('court').setPointerCapture(ev.pointerId);return}
  }
@@ -405,7 +407,7 @@ $('court').onpointerdown=ev=>{
  if(tool==='select'){
   lineDraft=null;
   if(id){
-   if(ev.shiftKey){editorSelection.has(id)?editorSelection.delete(id):editorSelection.add(id);focus=editorSelection.size===1?[...editorSelection][0]:null;board();return}
+   if(ev.shiftKey){editorSelection.has(id)?editorSelection.delete(id):editorSelection.add(id);focus=editorSelection.size===1?[...editorSelection][0]:null;board();renderAnnotationOptions();return}
    if(!editorSelection.has(id))editorSelection=new Set([id]);
    focus=editorSelection.size===1?id:null;
    drag={mode:'move',start:p,originals:step().elements.filter(e=>editorSelection.has(e.id)).map(clone),changed:false};
@@ -466,7 +468,7 @@ function finish(ev){
   if(box.w>2||box.h>2)editorSelection=new Set(step().elements.filter(e=>inSelectionBox(e,box)).map(e=>e.id));
   focus=editorSelection.size===1?[...editorSelection][0]:null;marquee=null;
  }
- drag=null;render();
+ drag=null;render();renderAnnotationOptions();
 }
 $('court').onpointerup=finish;
 $('court').onpointercancel=()=>{if(drag?.mode==='lineStart')lineDraft=null;drag=null;marquee=null;render()};
@@ -653,7 +655,7 @@ function library(){
  syncExportSelection();
 }
 
-function render(options={}){document.body.classList.toggle('light',state.theme==='light');$('title').textContent=play().name;$('title').title=play().name;$('notes').value=step().notes;$('half').classList.toggle('active',!play().full);$('full').classList.toggle('active',play().full);$('stepStatus').textContent=play().id?'Paso '+(play().steps.findIndex(s=>s.id===sid)+1)+' de '+play().steps.length:'Sin secuencias';if(options.keepLibrary)syncExportSelection();else library();board();let t=projection(play().full);$('steps').innerHTML=play().steps.map((s,i)=>'<button class="thumb '+(sid===s.id?'active':'')+'" data-step="'+s.id+'"><svg viewBox="0 0 '+t.w+' '+t.h+'">'+sceneSVG(s,play().full)+'</svg><span data-rename-step="'+esc(s.id)+'">'+(i+1)+'. '+esc(s.name)+'</span></button>').join('')+'<button onclick="newStep()" '+(!play().id?'disabled':'')+' title="Agregar una secuencia copiando la actual">+ Agregar secuencia</button>';save()}
+function render(options={}){document.body.classList.toggle('light',state.theme==='light');$('title').textContent=play().name;$('title').title=play().name;$('notes').value=step().notes;$('half').classList.toggle('active',!play().full);$('full').classList.toggle('active',play().full);$('stepStatus').textContent=play().id?'Paso '+(play().steps.findIndex(s=>s.id===sid)+1)+' de '+play().steps.length:'Sin secuencias';if(options.keepLibrary)syncExportSelection();else library();board();let t=projection(play().full);$('steps').innerHTML=play().steps.map((s,i)=>'<button class="thumb '+(sid===s.id?'active':'')+'" data-step="'+s.id+'"><svg viewBox="0 0 '+t.w+' '+t.h+'">'+sceneSVG(s,play().full)+'</svg><span data-rename-step="'+esc(s.id)+'">'+(i+1)+'. '+esc(s.name)+'</span></button>').join('')+'<button onclick="newStep()" '+(!play().id?'disabled':'')+' title="Agregar una secuencia copiando la actual">+ Agregar secuencia</button>';save();renderAnnotationOptions()}
 function exportDialog(){syncExportSelection();$('exportInfo').textContent=libraryPicked.size?(selected.size?selected.size+' jugadas seleccionadas.':'Las carpetas seleccionadas están vacías.'):'Se exportará la jugada actual.';$('export').hidden=!$('export').hidden}
 $('export').close=()=>{$('export').hidden=true};
 $('library').addEventListener('click',ev=>{let id=ev.target.closest('[data-collapse]')?.dataset.collapse;if(id){libraryFolder=id;collapsedFolders.has(id)?collapsedFolders.delete(id):collapsedFolders.add(id);library()}});
@@ -749,6 +751,14 @@ document.addEventListener('keydown',ev=>{
  if(key==='c'){if(window.getSelection()?.toString())return;ev.preventDefault();copyCurrentStep()}
  if(key==='v'&&stepClipboard){ev.preventDefault();if(!ev.repeat)pasteCopiedStep()}
 });
+function handleToolShortcut(ev){
+ const active=document.activeElement,target=ev.target;
+ if(ev.defaultPrevented||ev.isComposing||ev.ctrlKey||ev.metaKey||ev.altKey||active?.isContentEditable||['INPUT','TEXTAREA','SELECT'].includes(active?.tagName)||target?.closest?.('input,textarea,select,[contenteditable]:not([contenteditable="false"])'))return;
+ const shortcut={t:'text',a:'select',o:'player',d:'defender',b:'ball',c:'cone'}[ev.key.toLowerCase()];
+ if(!shortcut)return;ev.preventDefault();if(ev.repeat)return;
+ setTool(shortcut);board();
+}
+document.addEventListener('keydown',handleToolShortcut);
 function returnToCursorOutside(ev){
  let path=ev.composedPath?ev.composedPath():[];
  if(ev.button!==0||ev.target.closest('#court-text-format'))return;
@@ -757,7 +767,7 @@ function returnToCursorOutside(ev){
  if(ev.button!==0||path.includes($('court'))||path.includes($('tools'))||ev.target.closest('#court,#tools,#annotation-options,.court-text-editor'))return;
  if(drag)return;
  if(tool!=='select')setTool('select');
- editorSelection.clear();focus=null;lineDraft=null;marquee=null;board();
+ editorSelection.clear();focus=null;lineDraft=null;marquee=null;board();renderAnnotationOptions();
 }
 document.addEventListener('pointerdown',returnToCursorOutside,true);
 
@@ -1080,12 +1090,31 @@ function installLibraryReordering(){
 var annotationColor='#E45454',annotationKind='circle',courtTextColor='#0C1D32',courtTextSize=20,courtTextBold=false,activeCourtText=null,courtTextFormatOpen=false,lastCourtTextClick=null;
 
 function selectedCourtText(){const e=step().elements.find(e=>e.id===focus);return e?.type==='text'?e:null}
+function selectedCourtShape(){
+ const e=step().elements.find(e=>e.id===focus);
+ return e?.type==='highlight'&&editorSelection.size<=1?e:null;
+}
 function renderAnnotationOptions(){
- let box=$('annotation-options');if(!box){box=document.createElement('div');box.id='annotation-options';box.className='annotation-options';document.querySelector('.layout main').append(box)}
- box.hidden=tool!=='highlight';if(box.hidden)return;
- box.innerHTML='<strong>Resaltar defensa</strong><div class="annotation-shapes">'+[['circle','Círculo'],['zone','Cuadrado']].map(([v,label])=>'<button type="button" data-annotation-kind="'+v+'" class="'+(annotationKind===v?'active':'')+'">'+label+'</button>').join('')+'</div><div class="annotation-colors">'+['#E45454','#E99A21','#007AAD','#259763','#875AC7','#0C1D32'].map(c=>'<button type="button" data-annotation-color="'+c+'" style="background:'+c+'" class="'+(annotationColor===c?'chosen':'')+'" aria-label="Color '+c+'"></button>').join('')+'</div><small>Haz clic o arrastra para definir la zona.</small>';
- box.style.top=Math.min($('tools').querySelector('[data-tool="highlight"]')?.offsetTop||200,350)+'px';
- box.onclick=ev=>{const color=ev.target.closest('[data-annotation-color]')?.dataset.annotationColor,kind=ev.target.closest('[data-annotation-kind]')?.dataset.annotationKind;if(color)annotationColor=color;if(kind)annotationKind=kind;renderAnnotationOptions()};
+ let box=$('annotation-options');if(!box){box=document.createElement('div');box.id='annotation-options';box.className='annotation-options'}
+ const shape=selectedCourtShape(),showShape=!!shape&&(tool==='select'||tool==='highlight');
+ box.hidden=!(showShape||tool==='highlight');
+ if(box.hidden)return;
+ box.innerHTML=showShape?'<div class="annotation-colors">'+['#E45454','#E99A21','#007AAD','#259763','#875AC7','#0C1D32'].map(c=>'<button type="button" data-annotation-color="'+c+'" style="background:'+c+'" class="'+(shape.color===c?'chosen':'')+'" aria-label="Color '+c+'" aria-pressed="'+(shape.color===c)+'"></button>').join('')+'</div>':'<div class="annotation-shapes">'+[['circle','Círculo'],['zone','Cuadrado']].map(([v,label])=>'<button type="button" data-annotation-kind="'+v+'" class="'+(annotationKind===v?'active':'')+'">'+label+'</button>').join('')+'</div>';
+ if(showShape){
+  $('app-frame').append(box);
+  const t=projection(play().full),pt=$('court').createSVGPoint();pt.x=shape.x*t.sx+t.ox;pt.y=(shape.y-(shape.ry||40))*t.sy+t.oy;
+  const pos=pt.matrixTransform($('court').getScreenCTM()),frame=$('app-frame').getBoundingClientRect(),scale=frame.width/1672;
+  const width=box.offsetWidth||250,height=box.offsetHeight||48;
+  box.style.left=Math.max(8,Math.min(1672-width-8,(pos.x-frame.left)/scale-width/2))+'px';
+  const top=(pos.y-frame.top)/scale;box.style.top=Math.max(8,top-height-12)+'px';
+ }else{document.querySelector('.layout main').append(box);box.style.left='70px';box.style.top=Math.min($('tools').querySelector('[data-tool="highlight"]')?.offsetTop||200,350)+'px'}
+ box.onpointerdown=ev=>ev.preventDefault();
+ box.onclick=ev=>{
+  const color=ev.target.closest('[data-annotation-color]')?.dataset.annotationColor,kind=ev.target.closest('[data-annotation-kind]')?.dataset.annotationKind;
+  if(color){annotationColor=color;const selectedShape=selectedCourtShape();if(selectedShape&&selectedShape.color!==color){checkpoint();selectedShape.color=color;render({keepLibrary:true})}}
+  if(kind)annotationKind=kind;
+  renderAnnotationOptions();
+ };
 }
 function closeCourtTextFormat(){courtTextFormatOpen=false;const box=document.getElementById('court-text-format');if(box)box.hidden=true}
 function selectCourtTextForEditing(){
