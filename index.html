@@ -506,7 +506,7 @@ function libraryTint(color,background,amount){
 }
 function libraryRowStyle(color,depth){
  color=/^#[0-9a-f]{6}$/i.test(color||'')?color:'#007AAD';
- return '--depth:'+depth+';--row-color:'+color+';--row-bg:'+libraryTint(color,'#FFFBFC',.18)+';--row-bg-dark:'+libraryTint(color,'#0C1D32',.24)+';--row-fg:#0C1D32';
+ return '--depth:'+depth+';--row-color:'+color+';--row-bg:'+libraryTint(color,'#FFFBFC',.32)+';--row-bg-dark:'+libraryTint(color,'#0C1D32',.36)+';--row-fg:#0C1D32';
 }
 
 function libraryPlayRow(p,rowDepth,folderColor){
