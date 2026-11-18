@@ -329,8 +329,8 @@ function basketballSVG(radius){return '<g transform="scale('+(radius/10)+') rota
 
 function highlightSVG(e){
  const c=esc(e.color||'#E45454'),rx=e.rx||40,ry=e.ry||40;
- let shape=e.kind==='zone'?'<rect x="'+(-rx)+'" y="'+(-ry)+'" width="'+(rx*2)+'" height="'+(ry*2)+'" rx="5"/>':'<ellipse rx="'+rx+'" ry="'+ry+'"/>';
- return '<g data-id="'+esc(e.id)+'" transform="translate('+e.x+' '+e.y+')" style="cursor:move"><g fill="'+c+'" fill-opacity=".2" stroke="'+c+'" stroke-width="2.5">'+shape+'</g>'+(e.kind==='mark'?'<text text-anchor="middle" dominant-baseline="central" font-family="Arial" font-size="25" font-weight="700" fill="'+c+'">!</text>':'')+'</g>';
+ let shape=e.kind==='zone'?'<rect x="'+(-rx)+'" y="'+(-ry)+'" width="'+(rx*2)+'" height="'+(ry*2)+'" rx="1"/>':'<ellipse rx="'+rx+'" ry="'+ry+'"/>';
+ return '<g data-id="'+esc(e.id)+'" transform="translate('+e.x+' '+e.y+')" style="cursor:move"><g fill="'+c+'" fill-opacity=".2" stroke="'+c+'" stroke-width="2.5">'+shape+'</g>'+''+'</g>';
 }
 function elementSVG(e){if(e.type==='highlight')return highlightSVG(e);let c=['move','pass','dribble','screen'].includes(e.type)?'#000000':(e.type==='player'?'#007AAD':esc(e.color)),s=e.size||20,w=e.width||3;if(['player','defender','ball','text','cone'].includes(e.type)){let shape=e.type==='cone'?'<g transform="scale('+(s/20)+')"><path d="M-16 15H16L12 20H-12Z" fill="#E66B10" stroke="#161616" stroke-width="1.5"/><path d="M0-20L12 15H-12Z" fill="#F59A23" stroke="#161616" stroke-width="1.5"/><path d="M-4.5-7H4.5L6.5-1H-6.5Z M-8 5H8L10 11H-10Z" fill="#FFFBFC"/></g>':e.type==='player'?'<circle r="'+s+'" fill="'+c+'"/>':e.type==='ball'?basketballSVG(s*.6):'';let label=e.type==='defender'?'X'+e.n:['ball','cone'].includes(e.type)?'':e.n;return '<g data-id="'+e.id+'" transform="translate('+e.x+' '+e.y+')" style="cursor:move">'+shape+'<text text-anchor="middle" dominant-baseline="central" font-family="Arial" font-size="'+(e.type==='text'?s:s*.95)+'" font-weight="'+(e.type==='text'?500:700)+'" fill="'+(e.type==='player'?'white':c)+'">'+esc(label)+'</text></g>'}let ex=e.ex??e.x+70,ey=e.ey??e.y-70,cx=e.cx??(e.x+ex)/2,cy=e.cy??(e.y+ey)/2;let curved=e.cx!=null,angle=Math.atan2(ey-cy,ex-cx);let d='M'+e.x+' '+e.y+(curved?(e.lineShape==='angle'?' L'+cx+' '+cy+' L'+ex+' '+ey:' Q'+cx+' '+cy+' '+ex+' '+ey):' L'+ex+' '+ey);if(e.type==='dribble'){let count=Math.max(4,Math.ceil(Math.hypot(ex-e.x,ey-e.y)/9));d='M'+e.x+' '+e.y;for(let i=1;i<=count;i++){let t=i/count,u=1-t,x=u*u*e.x+2*u*t*cx+t*t*ex,y=u*u*e.y+2*u*t*cy+t*t*ey,dx=2*u*(cx-e.x)+2*t*(ex-cx),dy=2*u*(cy-e.y)+2*t*(ey-cy),len=Math.hypot(dx,dy)||1,offset=i===count?0:(i%2?4:-4);d+=' L'+(x-dy/len*offset)+' '+(y+dx/len*offset)}}let tip=e.type==='screen'?'<path d="M'+(ex-Math.sin(angle)*10)+' '+(ey+Math.cos(angle)*10)+' L'+(ex+Math.sin(angle)*10)+' '+(ey-Math.cos(angle)*10)+'"/>':'<path d="M'+(ex-12*Math.cos(angle-.45))+' '+(ey-12*Math.sin(angle-.45))+' L'+ex+' '+ey+' L'+(ex-12*Math.cos(angle+.45))+' '+(ey-12*Math.sin(angle+.45))+'"/>';return '<g data-id="'+e.id+'" stroke="'+c+'" fill="none" stroke-width="'+w+'" style="cursor:move"><path d="'+d+'" stroke="transparent" stroke-width="24" pointer-events="stroke"/><path d="'+d+'" '+(e.type==='pass'?'stroke-dasharray="9 7"':'')+'/>'+tip+'</g>'}
 
@@ -338,7 +338,7 @@ function sceneSVG(st,full){let sx=full?1:1.4;return '<g transform="scale('+sx+' 
 function library(){let query=$('search').value.toLowerCase();$('library').innerHTML=state.folders.map(f=>{let plays=state.plays.filter(p=>p.folder===f.id&&p.name.toLowerCase().includes(query));return '<div class="folder"><div class="row"><input type="checkbox" data-folder="'+f.id+'" '+(state.plays.filter(p=>p.folder===f.id).length&&state.plays.filter(p=>p.folder===f.id).every(p=>selected.has(p.id))?'checked':'')+'><input type="color" value="'+f.color+'" data-fcolor="'+f.id+'"><span class="label" data-fname="'+f.id+'">'+esc(f.name)+'</span><button class="mini" data-fdelete="'+f.id+'" title="Eliminar carpeta">×</button></div>'+plays.map(p=>'<div class="row play '+(p.id===pid?'current':'')+'"><input type="checkbox" data-check="'+p.id+'" '+(selected.has(p.id)?'checked':'')+'><span class="label" data-play="'+p.id+'">'+esc(p.name)+'</span><button class="mini" data-pdelete="'+p.id+'" title="Eliminar jugada">×</button></div>').join('')+'</div>'}).join('');$('count').textContent=selected.size+' jugadas seleccionadas'}
 function render(){if($('stepStatus'))$('stepStatus').textContent=play().id?'Paso '+(play().steps.findIndex(s=>s.id===sid)+1)+' de '+play().steps.length:'Sin secuencias';document.body.classList.toggle('light',state.theme==='light');$('title').textContent=play().name;$('title').title=play().name;$('notes').value=step().notes;$('half').classList.toggle('active',!play().full);$('full').classList.toggle('active',play().full);library();board();$('steps').innerHTML=play().steps.map((s,i)=>'<button class="thumb '+(sid===s.id?'active':'')+'" data-step="'+s.id+'"><svg viewBox="0 0 '+(play().full?600:840)+' '+(play().full?1060:560)+'">'+sceneSVG(s,play().full)+'</svg><span data-rename-step="'+esc(s.id)+'">'+(i+1)+'. '+esc(s.name)+'</span></button>').join('')+'<button onclick="newStep()" '+(!play().id?'disabled':'')+' title="Agregar una secuencia copiando la actual">+ Agregar secuencia</button>';save()}
 
-const toolPaths={highlight:'<circle cx="12" cy="12" r="9" stroke-dasharray="3 2"/><path d="M12 7v6M12 17h.01"/>',cone:'<path d="M12 3L19 19H5Z M4 19H20L22 22H2Z"/><path d="M9.5 9H14.5M7.5 14H16.5"/>',select:'<path d="M5 3L19 14L12 15L9 22Z" fill="currentColor"/>',player:'<circle cx="12" cy="12" r="9"/><text x="12" y="16" text-anchor="middle" font-size="12" fill="currentColor" stroke="none">1</text>',defender:'<path d="M5 5L19 19M19 5L5 19"/>',ball:'<g transform="translate(12 12) rotate(-20)"><circle r="9" stroke-width="1.7"/><path d="M-9 0H9M0-9V9M-6.364-6.364C-2.52-4.32-2.52 4.32-6.364 6.364M6.364-6.364C2.52-4.32 2.52 4.32 6.364 6.364" stroke-width="1.2"/></g>',move:'<path d="M3 20Q5 5 20 5M14 2L21 5L18 12"/>',pass:'<path d="M2 12H19" stroke-dasharray="3 3"/><path d="M15 6L21 12L15 18"/>',dribble:'<path d="M2 12C3.5 4 5.5 4 7 12S10.5 20 12 12S15.5 4 17 12C17.5 14.5 18.5 16 21 12M17.5 10.5L21.5 12L20 16"/>',screen:'<path d="M3 12H19M19 4V20"/>',text:'<path d="M4 5V3H20V5M12 3V21M8 21H16"/>',delete:'<path d="M4 6H20M9 6V3H15V6M6 6L7 21H17L18 6M10 10V17M14 10V17"/>'};
+const toolPaths={highlight:'<circle cx="9" cy="9" r="6"/><rect x="10" y="10" width="11" height="11" rx="1"/>',cone:'<path d="M12 3L19 19H5Z M4 19H20L22 22H2Z"/><path d="M9.5 9H14.5M7.5 14H16.5"/>',select:'<path d="M5 3L19 14L12 15L9 22Z" fill="currentColor"/>',player:'<circle cx="12" cy="12" r="9"/><text x="12" y="16" text-anchor="middle" font-size="12" fill="currentColor" stroke="none">1</text>',defender:'<path d="M5 5L19 19M19 5L5 19"/>',ball:'<g transform="translate(12 12) rotate(-20)"><circle r="9" stroke-width="1.7"/><path d="M-9 0H9M0-9V9M-6.364-6.364C-2.52-4.32-2.52 4.32-6.364 6.364M6.364-6.364C2.52-4.32 2.52 4.32 6.364 6.364" stroke-width="1.2"/></g>',move:'<path d="M3 20Q5 5 20 5M14 2L21 5L18 12"/>',pass:'<path d="M2 12H19" stroke-dasharray="3 3"/><path d="M15 6L21 12L15 18"/>',dribble:'<path d="M2 12C3.5 4 5.5 4 7 12S10.5 20 12 12S15.5 4 17 12C17.5 14.5 18.5 16 21 12M17.5 10.5L21.5 12L20 16"/>',screen:'<path d="M3 12H19M19 4V20"/>',text:'<path d="M4 5V3H20V5M12 3V21M8 21H16"/>',delete:'<path d="M4 6H20M9 6V3H15V6M6 6L7 21H17L18 6M10 10V17M14 10V17"/>'};
 function toolIcon(id){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+toolPaths[id]+'</svg>'}
 const toolList=[['select','↖ Seleccionar'],['player','● Jugador'],['defender','X1 Defensor'],['ball','◉ Balón'],['cone','△ Conos'],['move','↗ Movimiento'],['pass','⇢ Pase'],['dribble','〰 Bote'],['screen','⊥ Bloqueo'],['text','T Texto'],['highlight','◎ Resaltar'],['delete','⌫ Borrar']];function setTool(t){if(t!==tool){lineDraft=null;marquee=null;editorSelection.clear();focus=null}tool=t;$('court').style.cursor=t==='select'?'default':'crosshair';if(t!=='select')closeDrawers();$('tools').innerHTML=toolList.map(([id,label])=>'<button class="'+(id===t?'active':'')+'" data-tool="'+id+'" title="'+label.replace(/^[^ ]+ /,'')+'" aria-label="'+label.replace(/^[^ ]+ /,'')+'">'+toolIcon(id)+'<span>'+label.replace(/^[^ ]+ /,'')+'</span></button>').join('');renderAnnotationOptions();$('hint').textContent=t==='select'?'Arrastra un elemento o selecciona varios con un recuadro. Suprimir borra la selección.':'Haz clic para colocar. Para líneas, clic en A y después en B; arrastra el círculo central para curvar.'}
 function coords(ev){let pt=$('court').createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;let p=pt.matrixTransform($('court').getScreenCTM().inverse());return{x:Math.max(25,Math.min(575,p.x/(play().full?1:1.4))),y:Math.max(25,Math.min(play().full?1035:535,p.y))}}
@@ -360,6 +360,11 @@ $('court').onpointerdown=ev=>{
  if(ev.button!==0||!play().id)return;ev.preventDefault();
  if(document.activeElement.closest('#steps [data-step]'))document.activeElement.blur();
  let p=coords(ev),id=ev.target.closest('[data-id]')?.dataset.id,handle=ev.target.dataset.handle;
+ const resizeId=ev.target.dataset.resizeHighlight,resizeSide=ev.target.dataset.resizeSide;
+ if(resizeId&&(tool==='select'||tool==='highlight')){
+  let e=step().elements.find(e=>e.id===resizeId&&e.type==='highlight');
+  if(e){focus=e.id;editorSelection=new Set([e.id]);drag={mode:'highlightResize',id:e.id,handle:resizeSide,original:clone(e),start:p,changed:false};$('court').setPointerCapture(ev.pointerId);return}
+ }
  if(handle&&(tool==='select'||isLineTool(tool))){
   let e=step().elements.find(e=>e.id===focus);if(e?.ex!=null){drag={mode:'handle',id:e.id,handle,original:clone(e),start:p,changed:false};$('court').setPointerCapture(ev.pointerId);return}
  }
@@ -407,7 +412,9 @@ $('court').onpointermove=ev=>{
  if(drag.mode==='marquee'){marquee.end=p;board();return}
  if(Math.hypot(p.x-drag.start.x,p.y-drag.start.y)<1&&!drag.changed)return;
  if(!drag.changed){checkpoint();drag.changed=true}
- if(drag.mode==='handle'){
+ if(drag.mode==='highlightResize'){
+  let e=step().elements.find(e=>e.id===drag.id);if(e)Object.assign(e,resizeHighlight(drag.original,drag.handle,p,ev.shiftKey));
+ }else if(drag.mode==='handle'){
   let e=step().elements.find(e=>e.id===drag.id);if(!e)return;
   if(drag.handle==='curve'){e.cx=2*p.x-(e.x+e.ex)/2;e.cy=2*p.y-(e.y+e.ey)/2;e.lineShape='curve'}
   else if(drag.handle==='start'){e.x=p.x;e.y=p.y}else{e.ex=p.x;e.ey=p.y}
@@ -627,12 +634,36 @@ function addFive(type){let existing=new Set(step().elements.filter(e=>e.type===t
 function giveBall(id){let holder=step().elements.find(e=>e.id===id);if(!holder)return;checkpoint();step().elements=step().elements.filter(e=>e.type!=='ball');step().elements.push({id:uid(),type:'ball',holder:id,x:Math.min(575,holder.x+23),y:holder.y+6,color:'#ef9924',size:20,width:2});focus=id;render()}
 
 function centerWorkTitle(){let space=document.querySelector('.court-space');if(!space)return;$('title').style.left=(space.parentElement.offsetLeft+space.offsetLeft+space.clientWidth/2)+'px';$('title').style.width=Math.min(500,space.clientWidth)+'px'}
+
+function highlightSelectionSVG(e,t,handles){
+ const rx=e.rx||40,ry=e.ry||40,l=e.x-rx,r=e.x+rx,top=e.y-ry,b=e.y+ry;
+ let html='<rect x="'+(l*t.sx+t.ox)+'" y="'+(top*t.sy+t.oy)+'" width="'+(rx*2*t.sx)+'" height="'+(ry*2*t.sy)+'" fill="none" stroke="#007AAD" stroke-width="1" stroke-opacity=".6" pointer-events="none"/>';
+ if(handles){const points=[['nw',l,top],['n',e.x,top],['ne',r,top],['e',r,e.y],['se',r,b],['s',e.x,b],['sw',l,b],['w',l,e.y]];
+ points.forEach(([handle,x,y])=>{const cursor=handle==='n'||handle==='s'?'ns-resize':handle==='e'||handle==='w'?'ew-resize':handle==='nw'||handle==='se'?'nwse-resize':'nesw-resize';html+='<circle data-resize-highlight="'+esc(e.id)+'" data-resize-side="'+handle+'" cx="'+(x*t.sx+t.ox)+'" cy="'+(y*t.sy+t.oy)+'" r="6" fill="white" stroke="#007AAD" stroke-width="2" style="cursor:'+cursor+'"><title>Arrastra para cambiar el tamaño</title></circle>'})}
+ return html;
+}
+function resizeHighlight(original,handle,point,keepRatio=false){
+ let l=original.x-(original.rx||40),r=original.x+(original.rx||40),top=original.y-(original.ry||40),b=original.y+(original.ry||40);
+ const min=12;
+ if(handle.includes('w'))l=Math.min(point.x,r-min);
+ if(handle.includes('e'))r=Math.max(point.x,l+min);
+ if(handle.includes('n'))top=Math.min(point.y,b-min);
+ if(handle.includes('s'))b=Math.max(point.y,top+min);
+ if(keepRatio&&handle.length===2){
+  const width=(original.rx||40)*2,height=(original.ry||40)*2,scale=Math.max((r-l)/width,(b-top)/height,min/width,min/height);
+  if(handle.includes('w'))l=r-width*scale;else r=l+width*scale;
+  if(handle.includes('n'))top=b-height*scale;else b=top+height*scale;
+ }
+ return{x:(l+r)/2,y:(top+b)/2,rx:(r-l)/2,ry:(b-top)/2};
+}
+
 function editorBoard(){
  let p=play(),st=step(),t=projection(p.full),w=t.w/courtZoom,h=t.h/courtZoom,court=$('court');
  court.setAttribute('viewBox',((t.w-w)/2)+' '+((t.h-h)/2)+' '+w+' '+h);
  let html=sceneSVG(st,p.full),ids=new Set([...editorSelection,...(focus?[focus]:[])]);
  st.elements.filter(e=>ids.has(e.id)).forEach(e=>{
-  if(e.ex!=null){let pts=lineSamples(e);html+='<path d="M'+pts.map(q=>(q.x*t.sx+t.ox)+' '+(q.y*t.sy+t.oy)).join(' L')+'" fill="none" stroke="#007AAD" stroke-opacity=".6" stroke-width="'+((e.width||3)+5)+'" pointer-events="none"/>'}
+  if(e.type==='highlight'){html+=highlightSelectionSVG(e,t,e.id===focus&&(tool==='select'||tool==='highlight'))}
+  else if(e.ex!=null){let pts=lineSamples(e);html+='<path d="M'+pts.map(q=>(q.x*t.sx+t.ox)+' '+(q.y*t.sy+t.oy)).join(' L')+'" fill="none" stroke="#007AAD" stroke-opacity=".6" stroke-width="'+((e.width||3)+5)+'" pointer-events="none"/>'}
   else html+='<circle cx="'+(e.x*t.sx+t.ox)+'" cy="'+(e.y*t.sy+t.oy)+'" r="'+((e.size||20)*(p.full?1:1.25)*(['player','defender'].includes(e.type)?offensiveScale():1)+6)+'" fill="none" stroke="#007AAD" stroke-dasharray="4 3" pointer-events="none"/>';
  });
  let e=st.elements.find(e=>e.id===focus);
@@ -989,7 +1020,7 @@ function renderAnnotationOptions(){
  let box=$('annotation-options');if(!box){box=document.createElement('div');box.id='annotation-options';box.className='annotation-options';document.querySelector('.layout main').append(box)}
  box.hidden=!['text','highlight'].includes(tool);if(box.hidden)return;
  const colors=['#E45454','#E99A21','#007AAD','#259763','#875AC7','#0C1D32'],current=tool==='text'?courtTextColor:annotationColor;
- box.innerHTML='<strong>'+(tool==='text'?'Texto en cancha':'Resaltar defensa')+'</strong>'+(tool==='highlight'?'<div class="annotation-shapes">'+[['circle','Círculo'],['zone','Zona'],['mark','Símbolo !']].map(([v,label])=>'<button type="button" data-annotation-kind="'+v+'" class="'+(annotationKind===v?'active':'')+'">'+label+'</button>').join('')+'</div>':'<small>Clic en la cancha para escribir. Doble clic para editar.</small>')+'<div class="annotation-colors">'+colors.map(c=>'<button type="button" data-annotation-color="'+c+'" style="background:'+c+'" class="'+(current===c?'chosen':'')+'" aria-label="Color '+c+'"></button>').join('')+'</div>'+(tool==='text'?'<label>Tamaño <input id="court-text-size" type="number" min="12" max="40" value="'+courtTextSize+'"></label>':'<small>Haz clic o arrastra para definir la zona.</small>');
+ box.innerHTML='<strong>'+(tool==='text'?'Texto en cancha':'Resaltar defensa')+'</strong>'+(tool==='highlight'?'<div class="annotation-shapes">'+[['circle','Círculo'],['zone','Cuadrado']].map(([v,label])=>'<button type="button" data-annotation-kind="'+v+'" class="'+(annotationKind===v?'active':'')+'">'+label+'</button>').join('')+'</div>':'<small>Clic en la cancha para escribir. Doble clic para editar.</small>')+'<div class="annotation-colors">'+colors.map(c=>'<button type="button" data-annotation-color="'+c+'" style="background:'+c+'" class="'+(current===c?'chosen':'')+'" aria-label="Color '+c+'"></button>').join('')+'</div>'+(tool==='text'?'<label>Tamaño <input id="court-text-size" type="number" min="12" max="40" value="'+courtTextSize+'"></label>':'<small>Haz clic o arrastra para definir la zona.</small>');
  const button=$('tools').querySelector('[data-tool="'+tool+'"]');box.style.top=Math.min(button?.offsetTop||200,350)+'px';
  box.onclick=ev=>{const color=ev.target.closest('[data-annotation-color]')?.dataset.annotationColor,kind=ev.target.closest('[data-annotation-kind]')?.dataset.annotationKind;if(color){if(tool==='text')courtTextColor=color;else annotationColor=color}if(kind)annotationKind=kind;if(color||kind)renderAnnotationOptions()};
  box.onchange=ev=>{if(ev.target.id==='court-text-size')courtTextSize=Math.max(12,Math.min(40,Number(ev.target.value)||20))};
