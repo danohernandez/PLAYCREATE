@@ -334,6 +334,17 @@ body:not(.light) .court-text-format button:hover,body:not(.light) .court-text-fo
 
 #court{-webkit-user-select:none;user-select:none}
 .court-text-editor{-webkit-user-select:text;user-select:text}
+
+#tools [data-tool="highlight"]{position:relative}
+#tools .shape-tool-caret{position:absolute;right:3px;bottom:3px;width:15px;height:15px;display:block;cursor:pointer}
+#tools .shape-tool-caret:after{content:"";position:absolute;right:1px;bottom:1px;border-left:6px solid transparent;border-bottom:6px solid currentColor}
+.shape-tool-menu{position:absolute;z-index:85;padding:5px;background:#FFFBFC;color:#0C1D32;border:1px solid #B7C5CF;box-shadow:0 4px 14px #0C1D3226;border-radius:6px;min-width:160px}
+.shape-tool-menu[hidden]{display:none}
+.shape-tool-menu button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;color:inherit;padding:8px 12px;font:16px Arial;text-align:left;border-radius:4px}
+.shape-tool-menu button:hover,.shape-tool-menu button[aria-checked="true"]{background:#D9E2E9}
+.shape-tool-menu svg{width:24px;height:24px}
+body:not(.light) .shape-tool-menu{background:#142738;color:#FFFBFC}
+body:not(.light) .shape-tool-menu button:hover,body:not(.light) .shape-tool-menu button[aria-checked="true"]{background:#31475B}
 </style><div id="app-frame"><header class="top"><div class="brand"><img src="/PLAYCREATE/icon-192-flat.png" width="46" height="46" style="border-radius:10px" alt="Logo Design Play">DESIGN PLAY</div><h1 id="title" class="work-title" aria-label="Jugada o drill actual" aria-live="polite"></h1><span id="save">Guardado</span><button class="head-action undo" onclick="undo()" title="Deshacer">↶</button><button class="head-action redo" onclick="redo()" title="Rehacer">↷</button><button class="head-action theme" onclick="theme()" title="Tema claro u oscuro">☀</button><button class="primary export-button" onclick="exportDialog()">⇧ Exportar PDF</button></header><div class="layout"><aside><h3 class="library-title">BIBLIOTECA</h3><input id="search" placeholder="⌕   Buscar jugadas..." oninput="library()"><button class="new-play create-folder-text" onclick="addFolder()">+ Crear carpeta</button><div class="library" id="library" role="tree" aria-multiselectable="true" aria-label="Carpetas y jugadas"></div><div class="utility"><button onclick="backup()">Respaldo</button><button onclick="$('file').click()">Importar</button></div><span id="count" hidden></span><input hidden id="file" type="file" accept=".json"></aside><main><div class="tools" id="tools" aria-label="Herramientas de dibujo"></div><div class="toolbar"><button id="half" onclick="setCourt(false)">⚿　Media cancha</button><button id="full" onclick="setCourt(true)">⚿　Cancha completa</button><select hidden id="lineShape"><option value="straight">Recta</option></select><span hidden id="zoomValue">100 %</span></div><div class="drawing-tip" id="drawingTip">Elige una acción y arrastra. Para curvar, mueve el punto celeste. Balón: toca al jugador que lo tiene.</div><div class="court-space"><div class="board"><svg id="court" xmlns="http://www.w3.org/2000/svg"></svg></div></div><section class="sequence-column" aria-label="Secuencias de la jugada"><h3 class="sequence-title">SECUENCIA</h3><div id="steps" class="strip"></div></section><textarea id="notes" class="notes" placeholder="Notas de este paso…"></textarea></main><aside hidden><h3 class="properties-title">PROPIEDADES</h3><div class="props"><label>Color:<span class="palette"><input type="color" id="color" value="#0066ff"><button class="swatch" style="background:#0050d7" onclick="chooseColor('#0050d7')"></button><button class="swatch" style="background:#71aff5" onclick="chooseColor('#71aff5')"></button><button class="swatch" style="background:#b5d9fc" onclick="chooseColor('#b5d9fc')"></button><button class="swatch" style="background:#fff" onclick="chooseColor('#ffffff')"></button></span></label><label>Tamaño:<input id="size" type="range" min="12" max="32" value="26"></label><label>Número:<input id="number" value="1" aria-label="Número o texto"></label><div><label>Grosor de línea:<input hidden id="width" type="range" min="2" max="8" value="4"></label><div class="width-buttons"><button onclick="chooseWidth(2)">―</button><button onclick="chooseWidth(4)">━</button><button onclick="chooseWidth(7)">▬</button></div></div></div><div class="element-more"><button onclick="applyTeam('player')">Color ataque</button><button onclick="applyTeam('defender')">Color defensa</button><button onclick="duplicateElement()">Duplicar ficha</button><button onclick="straightenLine()" title="Selecciona una línea y arrastra el círculo central para curvarla">Enderezar línea</button><button onclick="duplicateStep()">Duplicar paso</button><button onclick="renameStep()">Renombrar paso</button><button onclick="deleteStep()">Eliminar paso</button></div><span id="hint" hidden></span></aside></div><footer class="bottom"><strong id="stepStatus"></strong><span><kbd>← →</kbd>Cambiar paso</span><span title="Ctrl + C copia el paso actual; Ctrl + V agrega la copia"><kbd>Ctrl + C / V</kbd>Copiar / Pegar paso</span><span><kbd>Supr</kbd>Borrar selección</span><span><kbd>Ctrl + Z</kbd>Deshacer</span><span><kbd>Ctrl + Y</kbd>Rehacer</span><span><kbd>Ctrl + E</kbd>Exportar</span></footer><div id="export" class="export-pop" hidden><button class="close-pop" onclick="$('export').hidden=true">×</button><h2>♧ Exportar selección</h2><small style="font-size:12px">Carpetas y jugadas seleccionadas</small><p id="exportInfo"></p><p>Exporta en un único PDF una o varias carpetas completas o jugadas individuales.</p><hr><label><input type="checkbox" checked disabled>Incluir todos los pasos</label><select id="perpage"><option value="1">1 paso por página</option><option value="2">2 pasos por página</option></select><button class="primary" onclick="printPDF()">⇧ Generar PDF</button></div></div><script>
 function closeDrawers(){document.querySelector('.layout').classList.remove('library-open','tools-open')}function toggleDrawer(name){let el=document.querySelector('.layout'),open=el.classList.contains(name+'-open');closeDrawers();if(!open)el.classList.add(name+'-open')}
 const $=id=>document.getElementById(id), uid=()=>crypto.randomUUID(), clone=x=>JSON.parse(JSON.stringify(x)), esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -358,8 +369,8 @@ function library(){let query=$('search').value.toLowerCase();$('library').innerH
 function render(){if($('stepStatus'))$('stepStatus').textContent=play().id?'Paso '+(play().steps.findIndex(s=>s.id===sid)+1)+' de '+play().steps.length:'Sin secuencias';document.body.classList.toggle('light',state.theme==='light');$('title').textContent=play().name;$('title').title=play().name;$('notes').value=step().notes;$('half').classList.toggle('active',!play().full);$('full').classList.toggle('active',play().full);library();board();$('steps').innerHTML=play().steps.map((s,i)=>'<button class="thumb '+(sid===s.id?'active':'')+'" data-step="'+s.id+'"><svg viewBox="0 0 '+(play().full?600:840)+' '+(play().full?1060:560)+'">'+sceneSVG(s,play().full)+'</svg><span data-rename-step="'+esc(s.id)+'">'+(i+1)+'. '+esc(s.name)+'</span></button>').join('')+'<button onclick="newStep()" '+(!play().id?'disabled':'')+' title="Agregar una secuencia copiando la actual">+ Agregar secuencia</button>';save()}
 
 const toolPaths={highlight:'<circle cx="9" cy="9" r="6"/><rect x="10" y="10" width="11" height="11" rx="1"/>',cone:'<path d="M12 3L19 19H5Z M4 19H20L22 22H2Z"/><path d="M9.5 9H14.5M7.5 14H16.5"/>',select:'<path d="M5 3L19 14L12 15L9 22Z" fill="currentColor"/>',player:'<circle cx="12" cy="12" r="9"/><text x="12" y="16" text-anchor="middle" font-size="12" fill="currentColor" stroke="none">1</text>',defender:'<path d="M5 5L19 19M19 5L5 19"/>',ball:'<g transform="translate(12 12) rotate(-20)"><circle r="9" stroke-width="1.7"/><path d="M-9 0H9M0-9V9M-6.364-6.364C-2.52-4.32-2.52 4.32-6.364 6.364M6.364-6.364C2.52-4.32 2.52 4.32 6.364 6.364" stroke-width="1.2"/></g>',move:'<path d="M3 20Q5 5 20 5M14 2L21 5L18 12"/>',pass:'<path d="M2 12H19" stroke-dasharray="3 3"/><path d="M15 6L21 12L15 18"/>',dribble:'<path d="M2 12C3.5 4 5.5 4 7 12S10.5 20 12 12S15.5 4 17 12C17.5 14.5 18.5 16 21 12M17.5 10.5L21.5 12L20 16"/>',screen:'<path d="M3 12H19M19 4V20"/>',text:'<path d="M4 5V3H20V5M12 3V21M8 21H16"/>',delete:'<path d="M4 6H20M9 6V3H15V6M6 6L7 21H17L18 6M10 10V17M14 10V17"/>'};
-function toolIcon(id){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+toolPaths[id]+'</svg>'}
-const toolList=[['select','↖ Seleccionar'],['player','● Jugador'],['defender','X1 Defensor'],['ball','◉ Balón'],['cone','△ Conos'],['move','↗ Movimiento'],['pass','⇢ Pase'],['dribble','〰 Bote'],['screen','⊥ Bloqueo'],['text','T Texto'],['highlight','◎ Resaltar'],['delete','⌫ Borrar']];function setTool(t,options={}){if(t!==tool){lineDraft=null;marquee=null;editorSelection.clear();focus=null}tool=t;$('court').style.cursor=t==='select'?'default':t==='text'?'text':'crosshair';$('court').dataset.tool=t;closeCourtTextFormat();if(t!=='select')closeDrawers();if(options.keepTools){$('tools').querySelectorAll('[data-tool]').forEach(button=>button.classList.toggle('active',button.dataset.tool===t))}else $('tools').innerHTML=toolList.map(([id,label])=>'<button class="'+(id===t?'active':'')+'" data-tool="'+id+'" title="'+label.replace(/^[^ ]+ /,'')+({text:' (T)',select:' (A)',player:' (O)',defender:' (D)',ball:' (B)',cone:' (C)'}[id]||'')+'" aria-label="'+label.replace(/^[^ ]+ /,'')+'">'+toolIcon(id)+'<span>'+label.replace(/^[^ ]+ /,'')+'</span></button>').join('');renderAnnotationOptions();$('hint').textContent=t==='select'?'Arrastra un elemento o selecciona varios con un recuadro. Suprimir borra la selección.':'Haz clic para colocar. Para líneas, clic en A y después en B; arrastra el círculo central para curvar.'}
+function toolIcon(id){if(id==='highlight')return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">'+(annotationKind==='zone'?'<rect x="4" y="4" width="16" height="16" rx=".5"/>':'<circle cx="12" cy="12" r="8"/>')+'</svg>';return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+toolPaths[id]+'</svg>'}
+const toolList=[['select','↖ Seleccionar'],['player','● Jugador'],['defender','X1 Defensor'],['ball','◉ Balón'],['cone','△ Conos'],['move','↗ Movimiento'],['pass','⇢ Pase'],['dribble','〰 Bote'],['screen','⊥ Bloqueo'],['text','T Texto'],['highlight','◎ Resaltar'],['delete','⌫ Borrar']];function setTool(t,options={}){if(t!==tool){lineDraft=null;marquee=null;editorSelection.clear();focus=null}tool=t;$('court').style.cursor=t==='select'?'default':t==='text'?'text':'crosshair';$('court').dataset.tool=t;closeCourtTextFormat();closeShapeToolMenu();if(t!=='select')closeDrawers();if(options.keepTools){$('tools').querySelectorAll('[data-tool]').forEach(button=>button.classList.toggle('active',button.dataset.tool===t))}else $('tools').innerHTML=toolList.map(([id,label])=>'<button class="'+(id===t?'active':'')+'" data-tool="'+id+'" title="'+label.replace(/^[^ ]+ /,'')+({text:' (T)',select:' (A)',player:' (O)',defender:' (D)',ball:' (B)',cone:' (C)',highlight:' (R)'}[id]||'')+'" aria-label="'+label.replace(/^[^ ]+ /,'')+'">'+toolIcon(id)+(id==='highlight'?'<i class="shape-tool-caret" data-shape-picker aria-hidden="true"></i>':'')+'<span>'+label.replace(/^[^ ]+ /,'')+'</span></button>').join('');renderAnnotationOptions();$('hint').textContent=t==='select'?'Arrastra un elemento o selecciona varios con un recuadro. Suprimir borra la selección.':'Haz clic para colocar. Para líneas, clic en A y después en B; arrastra el círculo central para curvar.'}
 function coords(ev){let pt=$('court').createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;let p=pt.matrixTransform($('court').getScreenCTM().inverse());return{x:Math.max(25,Math.min(575,p.x/(play().full?1:1.4))),y:Math.max(25,Math.min(play().full?1035:535,p.y))}}
 
 function isLineTool(t){return ['move','pass','dribble','screen'].includes(t)}
@@ -462,6 +473,7 @@ $('court').onpointermove=ev=>{
  board();
 };
 function finish(ev){
+ if(drag?.mode==='highlight'){const id=drag.id;drag=null;setTool('select');focus=id;editorSelection=new Set([id]);render({keepLibrary:true});return}
  if(drag?.mode==='lineStart'){let p=coords(ev);if(Math.hypot(p.x-drag.start.x,p.y-drag.start.y)>6)commitDraftLine(p);drag=null;board();return}
  if(drag?.mode==='marquee'&&marquee){
   let a=marquee.start,b=marquee.end,box={x:Math.min(a.x,b.x),y:Math.min(a.y,b.y),w:Math.abs(a.x-b.x),h:Math.abs(a.y-b.y)};
@@ -548,7 +560,7 @@ document.onkeydown=ev=>{
   if(deleteContext==='steps'||active.closest('#steps [data-step]')){deleteStep();focusStepThumbnail()}
   else deleteElement();
  }
-};$('tools').onclick=ev=>{let t=ev.target.closest('[data-tool]')?.dataset.tool;if(t){if(t==='delete'&&step().elements.some(e=>editorSelection.has(e.id)||e.id===focus))deleteElement();setTool(t)}};
+};$('tools').onclick=ev=>{if(ev.target.closest('[data-shape-picker]')){toggleShapeToolMenu();return}let t=ev.target.closest('[data-tool]')?.dataset.tool;if(t){if(t==='delete'&&step().elements.some(e=>editorSelection.has(e.id)||e.id===focus))deleteElement();setTool(t)}};
 /* Reference layout renderer. Stored play coordinates remain unchanged. */
 var collapsedFolders=new Set(),courtZoom=1;
 function fitFrame(){let v=window.visualViewport,w=v?v.width:document.documentElement.clientWidth,h=v?v.height:document.documentElement.clientHeight,scale=w/1672,frame=$('app-frame');frame.style.height=(h/scale)+'px';frame.style.transform='scale('+scale+')';frame.style.left=(v?v.offsetLeft:0)+'px';frame.style.top=(v?v.offsetTop:0)+'px';centerWorkTitle()}
@@ -754,14 +766,14 @@ document.addEventListener('keydown',ev=>{
 function handleToolShortcut(ev){
  const active=document.activeElement,target=ev.target;
  if(ev.defaultPrevented||ev.isComposing||ev.ctrlKey||ev.metaKey||ev.altKey||active?.isContentEditable||['INPUT','TEXTAREA','SELECT'].includes(active?.tagName)||target?.closest?.('input,textarea,select,[contenteditable]:not([contenteditable="false"])'))return;
- const shortcut={t:'text',a:'select',o:'player',d:'defender',b:'ball',c:'cone'}[ev.key.toLowerCase()];
+ const shortcut={t:'text',a:'select',o:'player',d:'defender',b:'ball',c:'cone',r:'highlight'}[ev.key.toLowerCase()];
  if(!shortcut)return;ev.preventDefault();if(ev.repeat)return;
  setTool(shortcut);board();
 }
 document.addEventListener('keydown',handleToolShortcut);
 function returnToCursorOutside(ev){
  let path=ev.composedPath?ev.composedPath():[];
- if(ev.button!==0||ev.target.closest('#court-text-format'))return;
+ if(ev.button!==0||ev.target.closest('#court-text-format,#shape-tool-menu'))return;
  if(activeCourtText&&!ev.target.closest('.court-text-editor')){const inCourt=path.includes($('court'))||ev.target.closest('#court');finishCourtText(false);if(inCourt){ev.preventDefault();ev.stopPropagation();setTool('select');return}}
  closeCourtTextFormat();
  if(ev.button!==0||path.includes($('court'))||path.includes($('tools'))||ev.target.closest('#court,#tools,#annotation-options,.court-text-editor'))return;
@@ -1090,6 +1102,22 @@ function installLibraryReordering(){
 var annotationColor='#E45454',annotationKind='circle',courtTextColor='#0C1D32',courtTextSize=20,courtTextBold=false,activeCourtText=null,courtTextFormatOpen=false,lastCourtTextClick=null;
 
 function selectedCourtText(){const e=step().elements.find(e=>e.id===focus);return e?.type==='text'?e:null}
+function closeShapeToolMenu(){
+ const menu=document.getElementById('shape-tool-menu');if(menu)menu.hidden=true;
+}
+function toggleShapeToolMenu(){
+ let menu=document.getElementById('shape-tool-menu');
+ if(menu&&!menu.hidden){closeShapeToolMenu();return}
+ if(!menu){menu=document.createElement('div');menu.id='shape-tool-menu';menu.className='shape-tool-menu';menu.setAttribute('role','menu');$('app-frame').append(menu)}
+ menu.hidden=false;menu.innerHTML=[['circle','Círculo'],['zone','Cuadrado']].map(([kind,label])=>'<button type="button" role="menuitemradio" aria-checked="'+(annotationKind===kind)+'" data-shape-kind="'+kind+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">'+(kind==='circle'?'<circle cx="12" cy="12" r="8"/>':'<rect x="4" y="4" width="16" height="16"/>')+'</svg><span>'+label+'</span></button>').join('');
+ const button=$('tools').querySelector('[data-tool="highlight"]'),rect=button?.getBoundingClientRect(),frame=$('app-frame').getBoundingClientRect(),scale=frame.width/1672;
+ menu.style.left=(rect?(rect.right-frame.left)/scale+8:130)+'px';menu.style.top=Math.max(8,rect?(rect.top-frame.top)/scale:350)+'px';
+ menu.onpointerdown=ev=>ev.preventDefault();
+ menu.onclick=ev=>{const kind=ev.target.closest('[data-shape-kind]')?.dataset.shapeKind;if(!['circle','zone'].includes(kind))return;annotationKind=kind;setTool('highlight');board()};
+}
+$('tools').addEventListener('keydown',ev=>{if(ev.target.closest('[data-tool="highlight"]')&&ev.altKey&&ev.key==='ArrowDown'){ev.preventDefault();toggleShapeToolMenu()}});
+document.addEventListener('pointerdown',ev=>{if(!ev.target.closest('#shape-tool-menu,[data-shape-picker]'))closeShapeToolMenu()},true);
+document.addEventListener('keydown',ev=>{if(ev.key==='Escape')closeShapeToolMenu()});
 function selectedCourtShape(){
  const e=step().elements.find(e=>e.id===focus);
  return e?.type==='highlight'&&editorSelection.size<=1?e:null;
@@ -1097,9 +1125,9 @@ function selectedCourtShape(){
 function renderAnnotationOptions(){
  let box=$('annotation-options');if(!box){box=document.createElement('div');box.id='annotation-options';box.className='annotation-options'}
  const shape=selectedCourtShape(),showShape=!!shape&&(tool==='select'||tool==='highlight');
- box.hidden=!(showShape||tool==='highlight');
+ box.hidden=!showShape;
  if(box.hidden)return;
- box.innerHTML=showShape?'<div class="annotation-colors">'+['#E45454','#E99A21','#007AAD','#259763','#875AC7','#0C1D32'].map(c=>'<button type="button" data-annotation-color="'+c+'" style="background:'+c+'" class="'+(shape.color===c?'chosen':'')+'" aria-label="Color '+c+'" aria-pressed="'+(shape.color===c)+'"></button>').join('')+'</div>':'<div class="annotation-shapes">'+[['circle','Círculo'],['zone','Cuadrado']].map(([v,label])=>'<button type="button" data-annotation-kind="'+v+'" class="'+(annotationKind===v?'active':'')+'">'+label+'</button>').join('')+'</div>';
+ box.innerHTML='<div class="annotation-colors">'+['#E45454','#E99A21','#007AAD','#259763','#875AC7','#0C1D32'].map(c=>'<button type="button" data-annotation-color="'+c+'" style="background:'+c+'" class="'+(shape.color===c?'chosen':'')+'" aria-label="Color '+c+'" aria-pressed="'+(shape.color===c)+'"></button>').join('')+'</div>';
  if(showShape){
   $('app-frame').append(box);
   const t=projection(play().full),pt=$('court').createSVGPoint();pt.x=shape.x*t.sx+t.ox;pt.y=(shape.y-(shape.ry||40))*t.sy+t.oy;
