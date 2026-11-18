@@ -344,7 +344,7 @@ $('library').onclick=ev=>{
 
 $('library').addEventListener('input',ev=>{if(ev.target.matches('[data-new-play-name]')&&libraryDraft)libraryDraft.name=ev.target.value});
 $('library').addEventListener('keydown',ev=>{if(!ev.target.matches('[data-new-play-name]'))return;ev.stopPropagation();if(ev.isComposing)return;if(ev.key==='Enter'){ev.preventDefault();if(libraryDraft)libraryDraft.name=ev.target.value;finishPlayName(false)}if(ev.key==='Escape'){ev.preventDefault();finishPlayName(true)}});
-$('library').addEventListener('focusout',ev=>{if(ev.target.matches('[data-new-play-name]')&&libraryDraft){libraryDraft.name=ev.target.value;finishPlayName(false)}});
+$('library').addEventListener('focusout',ev=>{if(ev.target.matches('[data-new-play-name]')&&libraryDraft){libraryDraft.name=ev.target.value;finishPlayName(false,true)}});
 $('library').onchange=ev=>{if(ev.target.matches('[data-new-play-name]'))return;let d=ev.target.dataset;if(d.fcolor){changeLibraryColor('folder',d.fcolor,ev.target.value);library()}else if(d.pcolor){changeLibraryColor('play',d.pcolor,ev.target.value);library()}};
 function focusStepThumbnail(){let button=[...$('steps').querySelectorAll('[data-step]')].find(b=>b.dataset.step===sid);if(button)button.focus({preventScroll:true})}
 $('steps').onclick=ev=>{let id=ev.target.closest('[data-step]')?.dataset.step;if(id){sid=id;focus=null;editorSelection.clear();lineDraft=null;render();focusStepThumbnail()}};
@@ -359,14 +359,19 @@ function addFolder(){let n=prompt('Nombre de la carpeta / equipo');if(n?.trim())
  $('search').value='';library();
  let input=$('library').querySelector('[data-new-play-name]');if(input){input.focus();input.scrollIntoView({block:'nearest'})}
 }
-function finishPlayName(cancel){
+function finishPlayName(cancel,passive=false){
  if(!libraryDraft)return;
- let draft=libraryDraft;libraryDraft=null;let name=draft.name.trim();
- if(cancel||!name){library();return}
- if(!state.folders.some(f=>f.id===draft.folder)){library();return}
+ let draft=libraryDraft,input=$('library').querySelector('[data-new-play-name]');
+ if(input)draft.name=input.value;
+ let row=input?.closest('.tree-new-play'),depth=row?Number(row.style.getPropertyValue('--depth'))||1:1;
+ libraryDraft=null;let name=draft.name.trim();
+ if(cancel||!name||!state.folders.some(f=>f.id===draft.folder)){if(passive){row?.remove();syncExportSelection()}else library();return}
  checkpoint();let p={id:uid(),folder:draft.folder,name,full:false,steps:[{id:uid(),name:'Inicio',notes:'',elements:[]}]};
- state.plays.push(p);pid=p.id;sid=p.steps[0].id;focus=null;render();
-}function insertCopiedStep(source,sourceFull){
+ state.plays.push(p);
+ if(passive){if(row)row.outerHTML=libraryPlayRow(p,depth,state.folders.find(f=>f.id===draft.folder)?.color);save();syncExportSelection()}
+ else{pid=p.id;sid=p.steps[0].id;focus=null;render()}
+}
+function insertCopiedStep(source,sourceFull){
  let p=play(),current=p.steps.findIndex(s=>s.id===sid),copy=clone(source);
  copy.id=uid();copy.name='Paso '+(p.steps.length+1);
  let ids=new Map(copy.elements.map(e=>[e.id,uid()]));
@@ -399,7 +404,7 @@ function board(){let p=play(),s=step(),t=projection(p.full),w=t.w/courtZoom,h=t.
 function straightenLine(){let e=step().elements.find(e=>e.id===focus);if(e&&e.ex!=null){checkpoint();delete e.cx;delete e.cy;e.lineShape='straight';render()}}function curveControl(e){return {x:e.cx??(e.x+e.ex)/2,y:e.cy??(e.y+e.ey)/2}}
 function coords(ev){let pt=$('court').createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;let p=pt.matrixTransform($('court').getScreenCTM().inverse()),t=projection(play().full);return{x:Math.max(25,Math.min(575,(p.x-t.ox)/t.sx)),y:Math.max(25,Math.min(play().full?1035:535,(p.y-t.oy)/t.sy))}}
 
-var libraryFolder=null,libraryDraft=null,libraryPicked=new Set(),libraryAnchor=null,libraryDrag=null,suppressLibraryClick=false,libraryBox=null;
+var libraryFolder=null,libraryDraft=null,libraryPicked=new Set(),libraryAnchor=null,libraryDrag=null,suppressLibraryClick=false,libraryBox=null,activeLibraryRename=null;
 function folderIds(id){let ids=new Set([id]);let changed=true;while(changed){changed=false;state.folders.forEach(f=>{if(ids.has(f.parent)&&!ids.has(f.id)){ids.add(f.id);changed=true}})}return ids}
 function addFolder(parent=null){let n=prompt(parent?'Nombre de la subcarpeta':'Nombre de la carpeta / equipo');if(!n?.trim())return;checkpoint();let f={id:uid(),name:n.trim(),color:'#007AAD'};if(parent)f.parent=parent;state.folders.push(f);libraryFolder=f.id;if(parent)collapsedFolders.delete(parent);render()}
 
@@ -414,6 +419,7 @@ function changeLibraryColor(type,id,color){
  if(!item||item.color===color)return false;
  checkpoint();item.color=color;save();return true;
 }
+function libraryPlayRow(p,rowDepth,folderColor){let depth=rowDepth-1,f={color:folderColor};return '<div class="row play '+(p.id===pid?'current':'')+'" role="treeitem" data-library-key="p:'+esc(p.id)+'" aria-selected="false" style="--depth:'+(depth+1)+'"><span class="tree-spacer"></span>'+libraryColorIcon('play',p.id,p.color||f.color,playIcon)+'<span class="label" data-play="'+esc(p.id)+'" title="'+esc(p.name)+'">'+esc(p.name)+'</span>'+action('data-pdelete',p.id,'Eliminar jugada','×')+'</div>'}
 function library(){
  let query=$('search').value.trim().toLowerCase();
  const folderIcon='<svg class="folder-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 5h8l2 3h10v12H2Z" fill="currentColor"/></svg>';
@@ -425,7 +431,7 @@ function library(){
   let children=state.folders.filter(c=>c.parent===f.id),matching=all.some(p=>p.name.toLowerCase().includes(query));
   if(query&&!f.name.toLowerCase().includes(query)&&!matching&&!children.length)return '';
   let open=query||!collapsedFolders.has(f.id),checked=all.length&&all.every(p=>selected.has(p.id));
-  let content=direct.filter(p=>!query||p.name.toLowerCase().includes(query)||f.name.toLowerCase().includes(query)).map(p=>'<div class="row play '+(p.id===pid?'current':'')+'" role="treeitem" data-library-key="p:'+esc(p.id)+'" aria-selected="false" style="--depth:'+(depth+1)+'"><span class="tree-spacer"></span>'+libraryColorIcon('play',p.id,p.color||f.color,playIcon)+'<span class="label" data-play="'+esc(p.id)+'" title="'+esc(p.name)+'">'+esc(p.name)+'</span>'+action('data-pdelete',p.id,'Eliminar jugada','×')+'</div>').join('');
+  let content=direct.filter(p=>!query||p.name.toLowerCase().includes(query)||f.name.toLowerCase().includes(query)).map(p=>libraryPlayRow(p,depth+1,f.color)).join('');
   return '<div class="folder"><div class="row folder-row '+(libraryFolder===f.id?'folder-selected':'')+'" role="treeitem" data-library-key="f:'+esc(f.id)+'" aria-selected="false" aria-expanded="'+!!open+'" style="--depth:'+depth+'"><button class="chevron" data-collapse="'+esc(f.id)+'" title="'+(open?'Contraer':'Expandir')+' carpeta">'+'<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4L10 8L6 12"/></svg>'+'</button>'+libraryColorIcon('folder',f.id,f.color,folderIcon)+'<span class="label" data-rename-folder="'+esc(f.id)+'" data-collapse="'+esc(f.id)+'" title="'+esc(f.name)+'">'+esc(f.name)+'</span><span class="tree-actions">'+action('data-addsequence',f.id,'Agregar jugada o drill','+')+'<details class="tree-menu"><summary title="Más opciones">⋯</summary><div>'+action('data-subfolder',f.id,'Crear subcarpeta','⊞')+action('data-fname',f.id,'Renombrar carpeta','✎')+''+action('data-fdelete',f.id,'Eliminar carpeta','×')+'</div></details></span></div>'+(open?'<div role="group" class="tree-children">'+(libraryDraft?.folder===f.id?'<div class="row play tree-new-play" style="--depth:'+(depth+1)+'"><span class="tree-spacer"></span>'+playIcon+'<input data-new-play-name class="inline-play-name" aria-label="Nombre de la jugada o drill" placeholder="Nombre de jugada o drill" value="'+esc(libraryDraft.name)+'" autocomplete="off" maxlength="160"></div>':'')+children.map(c=>branch(c,depth+1,next)).join('')+content+'</div>':'')+'</div>';
  }
  let roots=state.folders.filter(f=>!f.parent||!state.folders.some(p=>p.id===f.parent));
@@ -493,7 +499,7 @@ function renameTarget(type,id){
  if(type==='step')return play().steps.find(s=>s.id===id);
 }
 function beginInlineRename(type,id){
- clearTimeout(renameClickTimer);
+ clearTimeout(renameClickTimer);if(activeLibraryRename)activeLibraryRename.finish(false,true);
  let attr=type==='folder'?'data-rename-folder':type==='play'?'data-play':'data-rename-step';
  let root=type==='step'?$('steps'):$('library');
  let label=[...root.querySelectorAll('['+attr+']')].find(el=>el.getAttribute(attr)===id);
@@ -502,15 +508,17 @@ function beginInlineRename(type,id){
  const input=document.createElement('input');input.type='text';input.value=item.name;input.className='inline-rename';input.maxLength=160;
  input.setAttribute('aria-label',type==='folder'?'Nombre de la carpeta':type==='play'?'Nombre de la jugada o drill':'Nombre del paso');
  label.replaceWith(input);let done=false;
- function finish(cancel){
-  if(done)return;done=true;
+ function finish(cancel,passive=false){
+  if(done)return;done=true;if(activeLibraryRename?.input===input)activeLibraryRename=null;
   let name=input.value.trim(),current=renameTarget(type,id);
   if(!cancel&&name&&current&&name!==current.name){checkpoint();current.name=name}
-  render();
+  if(passive){label.textContent=type==='step'?(play().steps.findIndex(s=>s.id===id)+1)+'. '+(current?.name||item.name):(current?.name||item.name);label.title=current?.name||item.name;if(input.isConnected)input.replaceWith(label);if(type==='play'&&id===pid){$('title').textContent=current.name;$('title').title=current.name}save();syncExportSelection()}
+  else render();
  }
  input.addEventListener('keydown',ev=>{ev.stopImmediatePropagation();if(ev.isComposing)return;if(ev.key==='Enter'){ev.preventDefault();finish(false)}if(ev.key==='Escape'){ev.preventDefault();finish(true)}});
  ['click','dblclick','pointerdown'].forEach(name=>input.addEventListener(name,ev=>ev.stopPropagation()));
- input.addEventListener('blur',()=>finish(false));
+ input.addEventListener('blur',()=>finish(false,true));
+ if(type!=='step')activeLibraryRename={input,type,id,finish};
  input.focus();input.select();
 }
 function nameFromEvent(ev){
@@ -536,6 +544,7 @@ function syncExportSelection(){
  selected=exportIdsForKeys(libraryPicked);
  [...$('library').querySelectorAll('[data-library-key]')].forEach(row=>{
   let key=row.dataset.libraryKey,chosen=libraryPicked.has(key)||(key.startsWith('p:')&&selected.has(key.slice(2)));
+  if(row.classList.contains('folder-row'))row.classList.toggle('folder-selected',key==='f:'+libraryFolder);
   row.classList.toggle('export-selected',chosen);row.setAttribute('aria-selected',String(chosen));
  });
  $('count').textContent=selected.size+' jugadas seleccionadas';
@@ -550,7 +559,7 @@ function installLibrarySelection(){
   ev.stopImmediatePropagation();clearTimeout(renameClickTimer);
   if(suppressLibraryClick){suppressLibraryClick=false;return}
   let row=ev.target.closest('[data-library-key]');
-  if(!row){libraryPicked.clear();libraryAnchor=null;syncExportSelection();return}
+  if(!row){libraryPicked.clear();libraryAnchor=null;libraryFolder=null;syncExportSelection();return}
   if(ev.detail>1)return;
   let key=row.dataset.libraryKey,ctrl=ev.ctrlKey||ev.metaKey;
   libraryPicked=selectionKeysForClick(key,ctrl,ev.shiftKey,[...root.querySelectorAll('[data-library-key]')].map(el=>el.dataset.libraryKey));
@@ -601,6 +610,26 @@ function installInlineRenaming(root){
  },true);
  root.addEventListener('dblclick',ev=>{let info=nameFromEvent(ev);if(!info)return;ev.preventDefault();ev.stopImmediatePropagation();clearTimeout(renameClickTimer);beginInlineRename(info.type,info.id)},true);
 }
+
+function leaveLibraryFolder(ev){
+ if(ev.button!==0)return;
+ const root=$('library'),target=ev.target;
+ let rename=activeLibraryRename;
+ if(rename&&!rename.input.closest('.row')?.contains(target))rename.finish(false,true);
+ if(libraryDraft){
+  const input=root.querySelector('[data-new-play-name]');
+  if(!input?.closest('.tree-new-play')?.contains(target)){if(input)libraryDraft.name=input.value;finishPlayName(false,true)}
+ }
+ root.querySelectorAll('details[open]').forEach(menu=>{if(!menu.contains(target))menu.removeAttribute('open')});
+ let row=target.closest('[data-library-key]');
+ if(!row){
+  clearTimeout(renameClickTimer);libraryFolder=null;
+  if(!target.closest('.export-button,#export')&&!ev.ctrlKey&&!ev.metaKey&&!ev.shiftKey){libraryPicked.clear();libraryAnchor=null}
+  syncExportSelection();
+ }
+}
+document.addEventListener('pointerdown',leaveLibraryFolder,true);
+
 installLibrarySelection();installInlineRenaming($('steps'));
 
 setTool('select');render();
