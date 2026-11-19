@@ -161,18 +161,48 @@ function drawPlaybackCourt(svg,elements,full,extra=''){
  svg.setAttribute('viewBox','0 0 600 '+(full?1060:600));
  svg.innerHTML=(full?courtBase(true):referenceCourt())+elements.filter(e=>!isCourtAction(e)).map(elementSVG).join('')+extra;
 }
+function connectPlaybackFrames(frames){
+ const actorKey=element=>element.n==null||element.n===''?element.type+':'+element.id:element.type+':'+String(element.n);
+ return frames.map((frame,index)=>{
+  const previous=frames[index-1];
+  if(!frame.motion||!previous?.motion)return frame;
+  const endings=new Map();
+  for(const element of previous.elements){
+   const point=previous.motion.finalPositions.get(element.id);
+   if(point)endings.set(actorKey(element),point);
+  }
+  const entryPositions=new Map();
+  for(const element of frame.elements){
+   if(!frame.motion.initial.has(element.id))continue;
+   const point=endings.get(actorKey(element));
+   if(point)entryPositions.set(element.id,point);
+  }
+  return {...frame,motion:{...frame.motion,entryPositions,entryBall:previous.motion.finalBallPosition}};
+ });
+}
+function smoothMotionTime(value){
+ const t=Math.max(0,Math.min(1,value));
+ return t*t*(3-2*t);
+}
+function interpolateCourtPoint(a,b,t){
+ return {x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t};
+}
 function createCourtMotion(svg,elements,full,motion){
- const {initial,actions,ball,ballPosition,syntheticBall}=motion;
+ const {initial,actions,ball,ballPosition,syntheticBall,entryPositions,entryBall}=motion;
  drawPlaybackCourt(svg,elements,full,syntheticBall?elementSVG(ball):'');
  const nodes=new Map([...svg.querySelectorAll('[data-id]')].map(node=>[node.getAttribute('data-id'),node]));
  const place=(id,p)=>nodes.get(String(id))?.setAttribute('transform','translate('+p.x+' '+p.y+')');
  const ballNode=ball?nodes.get(String(ball.id)):null;
  return {draw(time){
-  for(const [id,point] of initial)place(id,point);
-  let currentBall=ballPosition;
+  const entry=smoothMotionTime(time/300);
+  for(const [id,point] of initial){
+   const start=entry<1?entryPositions?.get(id):null;
+   place(id,start?interpolateCourtPoint(start,point,entry):point);
+  }
+  let currentBall=entry<1&&entryBall&&ballPosition?interpolateCourtPoint(entryBall,ballPosition,entry):ballPosition;
   for(const action of actions){
    if(time<action.start)break;
-   const point=action.path(Math.min(1,(time-action.start)/(action.end-action.start)));
+   const point=action.path(smoothMotionTime((time-action.start)/(action.end-action.start)));
    if(action.actor!==undefined)place(action.actor,point);
    if(action.pass||action.carry)currentBall=action.pass?point:courtBallOffset(point);
    if(time<action.end)break;
