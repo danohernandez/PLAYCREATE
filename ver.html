@@ -67,7 +67,10 @@ async function showSharedPlay(){
    const step=selectedPlay.steps[index];
    if(imageUrl)URL.revokeObjectURL(imageUrl);
    // Keep shared SVG in an image context, where scripts are disabled.
-   imageUrl=URL.createObjectURL(new Blob([step.svg??renderSharedCourt(step.elements,selectedPlay.full)],{type:'image/svg+xml'}));
+   // Older links may contain a dribble arrow serialized without an attribute value.
+   const svg=step.svg?.replace(/<path data-dribble-arrowhead(?=\s+d=)/g,'<path data-dribble-arrowhead=""')
+    ??renderSharedCourt(step.elements,selectedPlay.full);
+   imageUrl=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));
    court.src=imageUrl;
    byId('step').textContent=step.name||'Secuencia '+(index+1);
    byId('notes').textContent=step.notes;
