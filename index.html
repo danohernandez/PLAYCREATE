@@ -423,7 +423,9 @@ body:not(.light) .board.court-sheet{background:transparent}
 .layout main:has(.has-sheet-navigation) .tools{top:calc(var(--court-area-top) + 28px)}
 .light .layout main{background:#F8FAFC}
 .light .court-space .board:not(.court-sheet){background:#FFFFFF}
-.library .row>[data-shareplay],.library .row>[data-sharefolder]{display:grid;place-items:center}
+.library .row>[data-shareplay],.library .row>[data-sharefolder],.library .row>[data-playback]{display:grid;place-items:center}
+.library .row>[data-playback]{font-size:15px}
+.library .row>[data-playback]:hover{outline:1px solid currentColor}
 .library [data-shareplay] svg,.library [data-sharefolder] svg{width:17px;height:17px;pointer-events:none}
 .library [data-shareplay]:hover,.library [data-sharefolder]:hover{outline:1px solid currentColor}
 #share-play{width:min(520px,90vw);border:1px solid #a7b9c8;border-radius:10px;padding:20px;background:#fff;color:#0c1d32;font:16px system-ui,sans-serif}
@@ -607,7 +609,7 @@ $('library').onclick=ev=>{
  if(d.shareplay){openLibraryShare('play',d.shareplay);return}
  if(d.colorfolder){openLibraryPalette('folder',d.colorfolder,el);return}
  if(d.colorplay){openLibraryPalette('play',d.colorplay,el);return}
- if(d.playback){el.closest('details')?.removeAttribute('open');openLibraryPlayback(d.playback);return}
+ if(d.playback){openLibraryPlayback(d.playback);return}
  if(d.playtags){openPlayTags(d.playtags);return}
  if(d.pname){beginInlineRename('play',d.pname);return}
 
@@ -1040,7 +1042,7 @@ function libraryTaggedPlayIcon(p){
 }
 function libraryPlayRow(p,rowDepth){
  const color=normalizeLibraryColor(p.color);
- return '<div class="row play '+(color?'has-row-color ':'')+(p.id===pid?'current':'')+'" role="treeitem" data-library-key="p:'+esc(p.id)+'" aria-selected="false" style="'+(color?libraryRowStyle(color,rowDepth):'--depth:'+rowDepth)+'">'+'<span class="tree-spacer"></span>'+libraryDragHandle('p:'+p.id)+libraryColorIcon('play',p.id,color,libraryTaggedPlayIcon(p))+'<span class="label" data-play="'+esc(p.id)+'" title="'+esc(p.name)+'">'+esc(p.name)+'</span>' +libraryAction('data-shareplay',p.id,'Compartir jugada',libraryShareIcon())+'<span class="tree-actions"><details class="tree-menu"><summary title="Más opciones">⋯</summary><div>'+libraryAction('data-playback',p.id,'Reproducir','▶')+libraryAction('data-pname',p.id,'Renombrar jugada','✎')+libraryAction('data-colorplay',p.id,'Cambiar color',libraryMenuColor(p.color))+libraryAction('data-playtags',p.id,'Editar etiquetas','#')+libraryAction('data-pdelete',p.id,'Eliminar jugada','×')+'</div></details></span>'+'</div>';
+ return '<div class="row play '+(color?'has-row-color ':'')+(p.id===pid?'current':'')+'" role="treeitem" data-library-key="p:'+esc(p.id)+'" aria-selected="false" style="'+(color?libraryRowStyle(color,rowDepth):'--depth:'+rowDepth)+'">'+'<span class="tree-spacer"></span>'+libraryDragHandle('p:'+p.id)+libraryColorIcon('play',p.id,color,libraryTaggedPlayIcon(p))+'<span class="label" data-play="'+esc(p.id)+'" title="'+esc(p.name)+'">'+esc(p.name)+'</span>' +libraryAction('data-playback',p.id,'Reproducir','▶')+libraryAction('data-shareplay',p.id,'Compartir jugada',libraryShareIcon())+'<span class="tree-actions"><details class="tree-menu"><summary title="Más opciones">⋯</summary><div>'+libraryAction('data-pname',p.id,'Renombrar jugada','✎')+libraryAction('data-colorplay',p.id,'Cambiar color',libraryMenuColor(p.color))+libraryAction('data-playtags',p.id,'Editar etiquetas','#')+libraryAction('data-pdelete',p.id,'Eliminar jugada','×')+'</div></details></span>'+'</div>';
 }
 function libraryFolderHeader(f,depth,open){
  const color=normalizeLibraryColor(f.color);
