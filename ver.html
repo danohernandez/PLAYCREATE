@@ -36,8 +36,8 @@ button:disabled{opacity:.45}
   <nav class="sequence-controls" aria-label="Controles de secuencia"><button id="previous" type="button">Anterior</button><button id="toggle" type="button">Reproducir</button><button id="next" type="button">Siguiente</button><label>Velocidad <select id="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></label><span id="position" aria-live="polite"></span></nav>
  </section>
 </main>
-<script src="./court-svg.js"></script>
-<script src="./sequence-playback.js"></script>
+<script src="./court-svg.js?v=90"></script>
+<script src="./sequence-playback.js?v=90"></script>
 <script>
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const byId=id=>document.getElementById(id);
