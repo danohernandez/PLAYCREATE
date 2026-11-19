@@ -3,7 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src blob:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src blob:; style-src 'unsafe-inline'; script-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'">
 <title>Jugada compartida · Design Play</title>
 <style>
 *{box-sizing:border-box}
@@ -33,11 +33,13 @@ button:disabled{opacity:.45}
   <nav aria-label="Secuencias"><button id="previous" type="button">Anterior</button><span id="position" aria-live="polite"></span><button id="next" type="button">Siguiente</button></nav>
  </section>
 </main>
+<script src="./court-svg.js"></script>
 <script>
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const byId=id=>document.getElementById(id);
 const message=byId('message');
 async function readSharedPlay(){
- const match=location.hash.match(/^#j1\.([A-Za-z0-9_-]{1,24000})$/);
+ const match=location.hash.match(/^#j[12]\.([A-Za-z0-9_-]{1,24000})$/);
  if(!match)throw Error('Enlace incompleto');
  const encoded=match[1].replace(/-/g,'+').replace(/_/g,'/');
  const bytes=Uint8Array.from(atob(encoded),character=>character.charCodeAt(0));
@@ -50,7 +52,7 @@ async function readSharedPlay(){
  const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip')).pipeThrough(limit);
  const data=JSON.parse(await new Response(stream).text());
  const isPlay=play=>typeof play?.name==='string'&&Array.isArray(play.steps)&&play.steps.length>0&&
-  play.steps.every(step=>typeof step?.name==='string'&&typeof step.notes==='string'&&typeof step.svg==='string');
+  play.steps.every(step=>typeof step?.name==='string'&&typeof step.notes==='string'&&(typeof step.svg==='string'||Array.isArray(step.elements)));
  const folder=Array.isArray(data?.plays);
  const plays=folder?data.plays:[data];
  if(typeof data?.name!=='string'||!plays.length||!plays.every(isPlay))throw Error('Contenido inválido');
@@ -65,7 +67,7 @@ async function showSharedPlay(){
    const step=selectedPlay.steps[index];
    if(imageUrl)URL.revokeObjectURL(imageUrl);
    // Keep shared SVG in an image context, where scripts are disabled.
-   imageUrl=URL.createObjectURL(new Blob([step.svg],{type:'image/svg+xml'}));
+   imageUrl=URL.createObjectURL(new Blob([step.svg??renderSharedCourt(step.elements,selectedPlay.full)],{type:'image/svg+xml'}));
    court.src=imageUrl;
    byId('step').textContent=step.name||'Secuencia '+(index+1);
    byId('notes').textContent=step.notes;
