@@ -676,15 +676,30 @@ async function openLibraryShare(type,id){
 }
 async function createSharedPlayLink(snapshot){
  const payload=new Blob([JSON.stringify(snapshot)]);
- if(payload.size>4*1024*1024)throw Error('La jugada es demasiado grande para compartirla por enlace.');
+ if(payload.size>4*1024*1024)throw Error('La jugada o carpeta es demasiado grande para compartirla.');
  if(typeof CompressionStream!=='function')throw Error('Abre Design Play en un navegador actualizado para generar el enlace.');
  const stream=payload.stream().pipeThrough(new CompressionStream('gzip'));
- const bytes=new Uint8Array(await new Response(stream).arrayBuffer());
- if(bytes.length>18000)throw Error('La jugada es demasiado larga para compartirla por enlace.');
- const encoded=btoa(String.fromCharCode(...bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
- const url=new URL('./ver.html',location.href);
- url.hash='j2.'+encoded;
- return url.href;
+ const bytes=await new Response(stream).arrayBuffer();
+ if(bytes.byteLength>512*1024)throw Error('La jugada o carpeta es demasiado grande para compartirla.');
+ const origin='https://dp.neonshell5.chatgpt.site';
+ let response;
+ try{
+  response=await fetch(origin+'/api/shares',{
+   method:'POST',
+   headers:{'Content-Type':'application/octet-stream'},
+   body:bytes,
+   signal:AbortSignal.timeout(15000)
+  });
+ }catch(error){
+  throw Error('No se pudo guardar la copia. Comprueba tu conexión y vuelve a intentar.');
+ }
+ if(response.status===429)throw Error('Espera un momento antes de crear otro enlace.');
+ if(response.status===413)throw Error('La jugada o carpeta es demasiado grande para compartirla.');
+ if(!response.ok)throw Error('No se pudo crear el enlace. Vuelve a intentar en un momento.');
+ let result;
+ try{result=await response.json()}catch(error){throw Error('No se pudo recibir el enlace. Vuelve a intentar en un momento.');}
+ if(!/^[A-Za-z0-9_-]{16}$/.test(result?.code||''))throw Error('El servicio devolvió un código inválido.');
+ return origin+'/'+result.code;
 }
 async function copySharedPlayLink(){
  const link=$('shared-link'),status=$('share-status');
