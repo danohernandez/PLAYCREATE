@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src blob:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>Jugada compartida · Design Play</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f4f7fa;color:#0c1d32;font:16px system-ui,sans-serif}
+main{max-width:42rem;margin:auto;padding:1rem}
+header{margin-bottom:1rem}
+header p{margin:0;color:#486075;font-size:.875rem}
+h1{font-size:clamp(1.4rem,5vw,2rem);margin:.2rem 0;overflow-wrap:anywhere}
+h2{font-size:1.1rem;margin:0 0 .5rem;overflow-wrap:anywhere}
+figure{margin:0;background:#fff;border:1px solid #d6e0e8;border-radius:.75rem;padding:.75rem}
+img{display:block;width:100%;height:auto;max-height:65vh;object-fit:contain}
+figcaption{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:.75rem}
+nav{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-top:.75rem}
+button{min-height:44px;padding:.5rem .8rem;border:0;border-radius:.4rem;background:#00729e;color:white;font:inherit}
+button:disabled{opacity:.45}
+</style>
+<main>
+ <header><p>Design Play · Solo lectura</p><h1 id="title">Jugada compartida</h1></header>
+ <p id="message" role="status">Cargando jugada…</p>
+ <section id="play" hidden>
+  <h2 id="step"></h2>
+  <figure><img id="court" alt="Diagrama de la cancha"><figcaption id="notes"></figcaption></figure>
+  <nav aria-label="Secuencias"><button id="previous" type="button">Anterior</button><span id="position" aria-live="polite"></span><button id="next" type="button">Siguiente</button></nav>
+ </section>
+</main>
+<script>
+const byId=id=>document.getElementById(id);
+const message=byId('message');
+async function readSharedPlay(){
+ const match=location.hash.match(/^#j1\.([A-Za-z0-9_-]{1,24000})$/);
+ if(!match)throw Error('Enlace incompleto');
+ const encoded=match[1].replace(/-/g,'+').replace(/_/g,'/');
+ const bytes=Uint8Array.from(atob(encoded),character=>character.charCodeAt(0));
+ let size=0;
+ const limit=new TransformStream({transform(chunk,controller){
+  size+=chunk.byteLength;
+  if(size>4*1024*1024)throw Error('Jugada demasiado grande');
+  controller.enqueue(chunk);
+ }});
+ const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip')).pipeThrough(limit);
+ const data=JSON.parse(await new Response(stream).text());
+ if(typeof data?.name!=='string'||!Array.isArray(data.steps)||!data.steps.length||
+    !data.steps.every(step=>typeof step?.name==='string'&&typeof step.notes==='string'&&typeof step.svg==='string')){
+  throw Error('Jugada inválida');
+ }
+ return data;
+}
+async function showSharedPlay(){
+ try{
+  const data=await readSharedPlay();
+  let index=0,imageUrl;
+  const previous=byId('previous'),next=byId('next'),court=byId('court');
+  function render(){
+   const step=data.steps[index];
+   if(imageUrl)URL.revokeObjectURL(imageUrl);
+   // Keep shared SVG in an image context, where scripts are disabled.
+   imageUrl=URL.createObjectURL(new Blob([step.svg],{type:'image/svg+xml'}));
+   court.src=imageUrl;
+   byId('step').textContent=step.name||'Secuencia '+(index+1);
+   byId('notes').textContent=step.notes;
+   byId('notes').hidden=!step.notes;
+   byId('position').textContent=(index+1)+' de '+data.steps.length;
+   previous.disabled=index===0;
+   next.disabled=index===data.steps.length-1;
+  }
+  byId('title').textContent=data.name;
+  document.title=data.name+' · Design Play';
+  previous.onclick=()=>{if(index>0){index--;render()}};
+  next.onclick=()=>{if(index<data.steps.length-1){index++;render()}};
+  render();
+  byId('play').hidden=false;
+  message.hidden=true;
+ }catch(error){
+  message.textContent='No se pudo abrir la jugada. Pide que te envíen el enlace completo y ábrelo en un navegador actualizado.';
+ }
+}
+showSharedPlay();
+</script>
+</html>
