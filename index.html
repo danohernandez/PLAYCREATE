@@ -437,8 +437,7 @@ body:not(.light) .board.court-sheet{background:transparent}
 #share-play button:disabled{opacity:.45}
 #share-play header{display:flex;justify-content:space-between;align-items:center;gap:12px}
 #share-play header h2{margin:0}
-#share-image-downloads{max-height:9em;overflow:auto;padding-left:1.2em}
-#share-image-downloads a{color:#00628c}
+#share-image-download{color:#00628c}
 #share-image-status{margin:.6em 0}
 #share-play .share-close{padding:1px 8px;background:transparent;color:#0c1d32;font-size:23px;line-height:1.3}
 .library-tag-filter{position:absolute;top:140px;left:16px;width:calc(100% - 32px);height:34px;padding:3px 8px;font-size:15px}
@@ -488,7 +487,7 @@ body:not(.light) .board.court-sheet{background:transparent}
 .sequence-stage:fullscreen{width:100%;height:100%;margin:0;padding:12px;background:#f4f7fa;color:#0c1d32;overflow:auto}
 .toolbar #editor-playback{flex:0 0 40px;padding:4px 0;color:#fff;background:#00729e;border-color:#00658c}
 .toolbar #editor-playback:disabled{opacity:.45;cursor:default}
-</style><script src="./court-svg.js?v=96"></script><script src="./sequence-playback.js?v=96"></script><body><dialog id="library-playback" class="library-playback" aria-labelledby="playback-title"><div id="playback-stage" class="library-playback-stage sequence-stage"><header><h2 id="playback-title"></h2><div class="library-playback-actions"><button type="button" onclick="sharePlaybackPlay()">Compartir</button><button type="button" onclick="this.closest('dialog').close()">Cerrar</button></div></header><p id="playback-step"></p><svg id="playback-court" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama de la cancha"></svg><p id="playback-notes"></p><nav class="sequence-controls" aria-label="Controles de reproducción"><input id="playback-progress" type="range" min="0" value="0" step="1" aria-label="Progreso del video"><div class="sequence-controls-row"><button id="playback-toggle" type="button" title="Reproducir" aria-label="Reproducir">▶</button><button id="playback-previous" type="button" title="Secuencia anterior" aria-label="Secuencia anterior">⏮</button><button id="playback-next" type="button" title="Secuencia siguiente" aria-label="Secuencia siguiente">⏭</button><span id="playback-clock">0:00 / 0:00</span><span id="playback-position" class="sequence-position" aria-live="polite"></span><select id="playback-speed" aria-label="Velocidad" title="Velocidad"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select><button id="playback-fullscreen" type="button" title="Pantalla completa" aria-label="Pantalla completa">⛶</button></div></nav></div></dialog><dialog id="play-tags-dialog" aria-labelledby="play-tags-heading" onkeydown="event.stopPropagation()"><form onsubmit="savePlayTags(event)"><h2 id="play-tags-heading">Etiquetas de la jugada</h2><label for="play-tags-input">Etiquetas separadas por comas</label><input id="play-tags-input" maxlength="272" autocomplete="off" placeholder="Ofensiva, Saque de banda"><div id="tag-suggestions" class="tag-suggestions" aria-label="Etiquetas guardadas"></div><footer><button type="button" onclick="this.closest('dialog').close()">Cancelar</button><button type="submit">Guardar</button></footer></form></dialog><dialog id="share-play" aria-labelledby="share-play-title"><header><h2 id="share-play-title">Compartir jugada</h2><button type="button" class="share-close" aria-label="Cerrar" onclick="this.closest('dialog').close()">×</button></header><p id="share-status" role="status"></p><input id="shared-link" aria-label="Enlace de solo lectura" readonly hidden><p id="share-image-status" role="status" hidden></p><ul id="share-image-downloads" aria-label="Imágenes para descargar" hidden></ul><footer><button type="button" onclick="openSharedPdf()">Descargar PDF</button><button id="copy-shared-link" type="button" onclick="copySharedPlayLink()">Enviar video (Link)</button><button id="send-shared-images" type="button" onclick="sendSharedImages()">Enviar imágenes</button></footer></dialog><div id="app-frame"><header class="top"><div class="brand"><img src="/PLAYCREATE/icon-192-flat.png" width="46" height="46" style="border-radius:10px" alt="Logo Design Play">DESIGN PLAY</div><h1 id="title" class="work-title" aria-label="Jugada o drill actual" aria-live="polite"></h1><span id="save">Guardado</span><button class="head-action undo" onclick="undo()" title="Deshacer">↶</button><button class="head-action redo" onclick="redo()" title="Rehacer">↷</button><button class="head-action theme" onclick="theme()" title="Tema claro u oscuro">☀</button><button class="primary export-button" onclick="exportDialog()">⇧ Exportar PDF</button></header><div class="layout"><aside><h3 class="library-title">BIBLIOTECA</h3><input id="search" placeholder="⌕   Buscar jugadas..." oninput="library()"><button class="new-play create-folder-text" onclick="addFolder()">+ Crear carpeta</button><select id="library-tag" class="library-tag-filter" aria-label="Filtrar por etiqueta" onchange="library()"><option value="">Todas las etiquetas</option></select><div class="library" id="library" role="tree" aria-multiselectable="true" aria-label="Carpetas y jugadas"></div><div class="utility"><button onclick="backup()">Respaldo</button><button onclick="$('file').click()">Importar</button></div><span id="count" hidden></span><input hidden id="file" type="file" accept=".json"></aside><main><div class="tools" id="tools" aria-label="Herramientas de dibujo"></div><div class="toolbar"><button id="half" onclick="setCourt(false)">⚿　Media cancha</button><button id="full" onclick="setCourt(true)">⚿　Cancha completa</button><button id="editor-playback" type="button" title="Reproducir jugada" aria-label="Reproducir jugada" onclick="openLibraryPlayback(play().id)">▶</button><select hidden id="lineShape"><option value="straight">Recta</option></select><span hidden id="zoomValue">100 %</span></div><div class="drawing-tip" id="drawingTip">Elige una acción y arrastra. Para curvar, mueve el punto celeste. Balón: toca al jugador que lo tiene.</div><div class="court-space"><div class="board"><svg id="court" xmlns="http://www.w3.org/2000/svg"></svg></div></div><section class="sequence-column" aria-label="Secuencias de la jugada"><h3 class="sequence-title">SECUENCIA</h3><div id="steps" class="strip"></div></section><textarea id="notes" class="notes" placeholder="Notas de este paso…"></textarea></main><aside hidden><h3 class="properties-title">PROPIEDADES</h3><div class="props"><label>Color:<span class="palette"><input type="color" id="color" value="#0066ff"><button class="swatch" style="background:#0050d7" onclick="chooseColor('#0050d7')"></button><button class="swatch" style="background:#71aff5" onclick="chooseColor('#71aff5')"></button><button class="swatch" style="background:#b5d9fc" onclick="chooseColor('#b5d9fc')"></button><button class="swatch" style="background:#fff" onclick="chooseColor('#ffffff')"></button></span></label><label>Tamaño:<input id="size" type="range" min="12" max="32" value="26"></label><label>Número:<input id="number" value="1" aria-label="Número o texto"></label><div><label>Grosor de línea:<input hidden id="width" type="range" min="2" max="8" value="4"></label><div class="width-buttons"><button onclick="chooseWidth(2)">―</button><button onclick="chooseWidth(4)">━</button><button onclick="chooseWidth(7)">▬</button></div></div></div><div class="element-more"><button onclick="applyTeam('player')">Color ataque</button><button onclick="applyTeam('defender')">Color defensa</button><button onclick="duplicateElement()">Duplicar ficha</button><button onclick="straightenLine()" title="Selecciona una línea y arrastra el círculo central para curvarla">Enderezar línea</button><button onclick="duplicateStep()">Duplicar paso</button><button onclick="renameStep()">Renombrar paso</button><button onclick="deleteStep()">Eliminar paso</button></div><span id="hint" hidden></span></aside></div><footer class="bottom"><strong id="stepStatus"></strong><span><kbd>← →</kbd>Cambiar paso</span><span title="Ctrl + C copia el paso actual; Ctrl + V agrega la copia"><kbd>Ctrl + C / V</kbd>Copiar / Pegar paso</span><span><kbd>Supr</kbd>Borrar selección</span><span><kbd>Ctrl + Z</kbd>Deshacer</span><span><kbd>Ctrl + Y</kbd>Rehacer</span><span><kbd>Ctrl + E</kbd>Exportar</span></footer><div id="export" class="export-pop" hidden><button class="close-pop" onclick="$('export').close()">×</button><h2>♧ Exportar selección</h2><small style="font-size:12px">Carpetas y jugadas seleccionadas</small><p id="exportInfo"></p><p>El PDF conserva la distribución de canchas del editor en hojas A4.</p><hr><label><input type="checkbox" checked disabled>Incluir todos los pasos</label><label for="print-orientation">Orientación</label><select id="print-orientation"><option value="portrait" selected>Vertical</option><option value="landscape">Horizontal</option></select><div class="team-print"><label for="pdf-team-name">Nombre del equipo</label><input id="pdf-team-name" maxlength="80" placeholder="Opcional" oninput="savePrintTeamName()"><label for="pdf-team-logo">Escudo del equipo</label><input id="pdf-team-logo" type="file" accept="image/png,image/jpeg,image/webp" onchange="loadPrintTeamLogo(this)"><button type="button" id="pdf-remove-logo" onclick="removePrintTeamLogo()" hidden>Quitar escudo</button><span id="pdf-logo-status" class="team-print-status" role="status"></span></div><button class="primary" id="generate-pdf" onclick="printPDF()">⇧ Generar PDF</button></div></div><script>
+</style><script src="./court-svg.js?v=96"></script><script src="./sequence-playback.js?v=96"></script><body><dialog id="library-playback" class="library-playback" aria-labelledby="playback-title"><div id="playback-stage" class="library-playback-stage sequence-stage"><header><h2 id="playback-title"></h2><div class="library-playback-actions"><button type="button" onclick="sharePlaybackPlay()">Compartir</button><button type="button" onclick="this.closest('dialog').close()">Cerrar</button></div></header><p id="playback-step"></p><svg id="playback-court" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama de la cancha"></svg><p id="playback-notes"></p><nav class="sequence-controls" aria-label="Controles de reproducción"><input id="playback-progress" type="range" min="0" value="0" step="1" aria-label="Progreso del video"><div class="sequence-controls-row"><button id="playback-toggle" type="button" title="Reproducir" aria-label="Reproducir">▶</button><button id="playback-previous" type="button" title="Secuencia anterior" aria-label="Secuencia anterior">⏮</button><button id="playback-next" type="button" title="Secuencia siguiente" aria-label="Secuencia siguiente">⏭</button><span id="playback-clock">0:00 / 0:00</span><span id="playback-position" class="sequence-position" aria-live="polite"></span><select id="playback-speed" aria-label="Velocidad" title="Velocidad"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select><button id="playback-fullscreen" type="button" title="Pantalla completa" aria-label="Pantalla completa">⛶</button></div></nav></div></dialog><dialog id="play-tags-dialog" aria-labelledby="play-tags-heading" onkeydown="event.stopPropagation()"><form onsubmit="savePlayTags(event)"><h2 id="play-tags-heading">Etiquetas de la jugada</h2><label for="play-tags-input">Etiquetas separadas por comas</label><input id="play-tags-input" maxlength="272" autocomplete="off" placeholder="Ofensiva, Saque de banda"><div id="tag-suggestions" class="tag-suggestions" aria-label="Etiquetas guardadas"></div><footer><button type="button" onclick="this.closest('dialog').close()">Cancelar</button><button type="submit">Guardar</button></footer></form></dialog><dialog id="share-play" aria-labelledby="share-play-title"><header><h2 id="share-play-title">Compartir jugada</h2><button type="button" class="share-close" aria-label="Cerrar" onclick="this.closest('dialog').close()">×</button></header><p id="share-status" role="status"></p><input id="shared-link" aria-label="Enlace de solo lectura" readonly hidden><p id="share-image-status" role="status" hidden></p><a id="share-image-download" hidden>Descargar imagen</a><footer><button type="button" onclick="openSharedPdf()">Descargar PDF</button><button id="copy-shared-link" type="button" onclick="copySharedPlayLink()">Enviar video (Link)</button><button id="send-shared-images" type="button" onclick="copyVisibleCourtImage()">Enviar imagen</button></footer></dialog><div id="app-frame"><header class="top"><div class="brand"><img src="/PLAYCREATE/icon-192-flat.png" width="46" height="46" style="border-radius:10px" alt="Logo Design Play">DESIGN PLAY</div><h1 id="title" class="work-title" aria-label="Jugada o drill actual" aria-live="polite"></h1><span id="save">Guardado</span><button class="head-action undo" onclick="undo()" title="Deshacer">↶</button><button class="head-action redo" onclick="redo()" title="Rehacer">↷</button><button class="head-action theme" onclick="theme()" title="Tema claro u oscuro">☀</button><button class="primary export-button" onclick="exportDialog()">⇧ Exportar PDF</button></header><div class="layout"><aside><h3 class="library-title">BIBLIOTECA</h3><input id="search" placeholder="⌕   Buscar jugadas..." oninput="library()"><button class="new-play create-folder-text" onclick="addFolder()">+ Crear carpeta</button><select id="library-tag" class="library-tag-filter" aria-label="Filtrar por etiqueta" onchange="library()"><option value="">Todas las etiquetas</option></select><div class="library" id="library" role="tree" aria-multiselectable="true" aria-label="Carpetas y jugadas"></div><div class="utility"><button onclick="backup()">Respaldo</button><button onclick="$('file').click()">Importar</button></div><span id="count" hidden></span><input hidden id="file" type="file" accept=".json"></aside><main><div class="tools" id="tools" aria-label="Herramientas de dibujo"></div><div class="toolbar"><button id="half" onclick="setCourt(false)">⚿　Media cancha</button><button id="full" onclick="setCourt(true)">⚿　Cancha completa</button><button id="editor-playback" type="button" title="Reproducir jugada" aria-label="Reproducir jugada" onclick="openLibraryPlayback(play().id)">▶</button><select hidden id="lineShape"><option value="straight">Recta</option></select><span hidden id="zoomValue">100 %</span></div><div class="drawing-tip" id="drawingTip">Elige una acción y arrastra. Para curvar, mueve el punto celeste. Balón: toca al jugador que lo tiene.</div><div class="court-space"><div class="board"><svg id="court" xmlns="http://www.w3.org/2000/svg"></svg></div></div><section class="sequence-column" aria-label="Secuencias de la jugada"><h3 class="sequence-title">SECUENCIA</h3><div id="steps" class="strip"></div></section><textarea id="notes" class="notes" placeholder="Notas de este paso…"></textarea></main><aside hidden><h3 class="properties-title">PROPIEDADES</h3><div class="props"><label>Color:<span class="palette"><input type="color" id="color" value="#0066ff"><button class="swatch" style="background:#0050d7" onclick="chooseColor('#0050d7')"></button><button class="swatch" style="background:#71aff5" onclick="chooseColor('#71aff5')"></button><button class="swatch" style="background:#b5d9fc" onclick="chooseColor('#b5d9fc')"></button><button class="swatch" style="background:#fff" onclick="chooseColor('#ffffff')"></button></span></label><label>Tamaño:<input id="size" type="range" min="12" max="32" value="26"></label><label>Número:<input id="number" value="1" aria-label="Número o texto"></label><div><label>Grosor de línea:<input hidden id="width" type="range" min="2" max="8" value="4"></label><div class="width-buttons"><button onclick="chooseWidth(2)">―</button><button onclick="chooseWidth(4)">━</button><button onclick="chooseWidth(7)">▬</button></div></div></div><div class="element-more"><button onclick="applyTeam('player')">Color ataque</button><button onclick="applyTeam('defender')">Color defensa</button><button onclick="duplicateElement()">Duplicar ficha</button><button onclick="straightenLine()" title="Selecciona una línea y arrastra el círculo central para curvarla">Enderezar línea</button><button onclick="duplicateStep()">Duplicar paso</button><button onclick="renameStep()">Renombrar paso</button><button onclick="deleteStep()">Eliminar paso</button></div><span id="hint" hidden></span></aside></div><footer class="bottom"><strong id="stepStatus"></strong><span><kbd>← →</kbd>Cambiar paso</span><span title="Ctrl + C copia el paso actual; Ctrl + V agrega la copia"><kbd>Ctrl + C / V</kbd>Copiar / Pegar paso</span><span><kbd>Supr</kbd>Borrar selección</span><span><kbd>Ctrl + Z</kbd>Deshacer</span><span><kbd>Ctrl + Y</kbd>Rehacer</span><span><kbd>Ctrl + E</kbd>Exportar</span></footer><div id="export" class="export-pop" hidden><button class="close-pop" onclick="$('export').close()">×</button><h2>♧ Exportar selección</h2><small style="font-size:12px">Carpetas y jugadas seleccionadas</small><p id="exportInfo"></p><p>El PDF conserva la distribución de canchas del editor en hojas A4.</p><hr><label><input type="checkbox" checked disabled>Incluir todos los pasos</label><label for="print-orientation">Orientación</label><select id="print-orientation"><option value="portrait" selected>Vertical</option><option value="landscape">Horizontal</option></select><div class="team-print"><label for="pdf-team-name">Nombre del equipo</label><input id="pdf-team-name" maxlength="80" placeholder="Opcional" oninput="savePrintTeamName()"><label for="pdf-team-logo">Escudo del equipo</label><input id="pdf-team-logo" type="file" accept="image/png,image/jpeg,image/webp" onchange="loadPrintTeamLogo(this)"><button type="button" id="pdf-remove-logo" onclick="removePrintTeamLogo()" hidden>Quitar escudo</button><span id="pdf-logo-status" class="team-print-status" role="status"></span></div><button class="primary" id="generate-pdf" onclick="printPDF()">⇧ Generar PDF</button></div></div><script>
 function closeDrawers(){document.querySelector('.layout').classList.remove('library-open','tools-open')}function toggleDrawer(name){let el=document.querySelector('.layout'),open=el.classList.contains(name+'-open');closeDrawers();if(!open)el.classList.add(name+'-open')}
 const $=id=>document.getElementById(id), uid=()=>crypto.randomUUID(), clone=x=>JSON.parse(JSON.stringify(x)), esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const seedPlayers=[{type:'player',x:300,y:435,n:'1'},{type:'player',x:480,y:350,n:'2'},{type:'player',x:500,y:180,n:'3'},{type:'player',x:100,y:180,n:'4'},{type:'player',x:330,y:300,n:'5'}].map(e=>({...e,id:uid(),color:'#1971ff',size:20,width:3}));
@@ -785,97 +784,79 @@ function openLibraryShare(type,id){
   return;
  }
  const dialog=$('share-play'),link=$('shared-link');
- clearSharedImages();
+ resetCourtImage();
  dialog.shareSelection={folder,plays};
  $('share-play-title').textContent=folder?'Compartir carpeta':'Compartir jugada';
  $('share-status').textContent=folder?folder.name:plays[0].name;
  link.value='';link.hidden=true;$('copy-shared-link').disabled=false;
  dialog.showModal();
 }
-let sharedImageRequest=null,sharedImageFiles=[],sharedImageUrls=[];
-function clearSharedImages(){
- sharedImageRequest=null;sharedImageFiles=[];
- for(const url of sharedImageUrls)URL.revokeObjectURL(url);
- sharedImageUrls=[];
- const list=$('share-image-downloads'),status=$('share-image-status'),button=$('send-shared-images');
- list.replaceChildren();list.hidden=true;status.hidden=true;button.disabled=false;
+let courtImageRequest=null,courtImageUrl=null;
+function resetCourtImage(){
+ courtImageRequest=null;
+ if(courtImageUrl){URL.revokeObjectURL(courtImageUrl);courtImageUrl=null;}
+ const link=$('share-image-download');
+ link.hidden=true;link.removeAttribute('href');
+ $('share-image-status').hidden=true;$('send-shared-images').disabled=false;
 }
 $('share-play').addEventListener('close',()=>{
- if(!$('share-play').open)clearSharedImages();
+ if(!$('share-play').open)resetCourtImage();
 });
-function imageNotesLines(ctx,notes,width){
- return (notes||'').split(/\r?\n/).flatMap(paragraph=>{
-  const lines=[];let line='';
-  for(const word of paragraph.trim().split(/\s+/)){
-   const next=line?line+' '+word:word;
-   if(line&&ctx.measureText(next).width>width){lines.push(line);line=word;}
-   else line=next;
-  }
-  return [...lines,line];
+function visibleCourtImageMarkup(p,steps){
+ const {w,h}=projection(p.full),{columns,rows}=courtSheetDimensions(steps.length);
+ const width=columns*w,height=rows*h;
+ const panels=steps.map((step,index)=>{
+  const x=index%columns*w,y=Math.floor(index/columns)*h;
+  return '<svg x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'">'+sceneSVG(step,p.full)+'</svg>';
  });
+ const background=state.theme==='light'?'#F8FAFC':'#101B28';
+ return {width,height,svg:'<svg xmlns="http://www.w3.org/2000/svg" width="'+width+'" height="'+height+'" viewBox="0 0 '+width+' '+height+'"><rect width="100%" height="100%" fill="'+background+'"/>'+panels.join('')+'</svg>'};
 }
-async function renderSharedPng(p,step,index){
- const {w,h}=projection(p.full),canvas=document.createElement('canvas');
- const ctx=canvas.getContext('2d');
- canvas.width=900;
- ctx.font='20px Arial';
- const notes=step.notes?.trim()?imageNotesLines(ctx,step.notes,canvas.width-48):[];
- const courtWidth=canvas.width-48,courtHeight=Math.round(courtWidth*h/w);
- canvas.height=105+courtHeight+notes.length*26;
- const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'">'+sceneSVG(step,p.full)+'</svg>';
+async function renderVisibleCourtImage({svg,width,height}){
  const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'})),image=new Image();
  try{
   image.src=url;await image.decode();
-  ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle='#0c1d32';ctx.font='bold 30px Arial';ctx.fillText(p.name,24,40,courtWidth);
-  ctx.font='20px Arial';ctx.fillText((index+1)+'. '+(step.name||'Secuencia'),24,69,courtWidth);
-  ctx.drawImage(image,24,83,courtWidth,courtHeight);
-  notes.forEach((line,i)=>ctx.fillText(line,24,103+courtHeight+i*26,courtWidth));
-  const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
-  if(!blob)throw Error('No se pudo generar la imagen.');
-  const name=String(p.name||'Jugada').replace(/[^\p{L}\p{N} _-]+/gu,'').trim().slice(0,65)||'Jugada';
-  return new File([blob],name+' - '+String(index+1).padStart(2,'0')+'.png',{type:'image/png'});
+  const canvas=document.createElement('canvas');
+  canvas.width=Math.round(width*1.5);canvas.height=Math.round(height*1.5);
+  canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height);
+  const png=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+  if(!png)throw Error('No se pudo generar la imagen.');
+  return png;
  }finally{URL.revokeObjectURL(url);}
 }
-async function sendSharedImages(){
- const dialog=$('share-play'),selection=dialog.shareSelection;
- const list=$('share-image-downloads'),status=$('share-image-status'),button=$('send-shared-images');
- if(!dialog.open||!selection||sharedImageRequest)return;
- if(sharedImageFiles.length){
-  const data={files:sharedImageFiles,title:selection.folder?.name||selection.plays[0].name};
-  if(navigator.share&&navigator.canShare?.(data)){
-   try{await navigator.share(data);}
-   catch(error){if(error.name!=='AbortError')status.textContent='Descarga las imágenes y adjúntalas en tu chat.';}
-  }else list.querySelector('a')?.focus();
-  return;
- }
- const request={};sharedImageRequest=request;
- const active=()=>dialog.open&&sharedImageRequest===request;
- button.disabled=true;status.hidden=false;
+async function copyVisibleCourtImage(){
+ const dialog=$('share-play'),p=play();
+ const status=$('share-image-status'),button=$('send-shared-images'),link=$('share-image-download');
+ if(!dialog.open||courtImageRequest)return;
+ if(activeCourtText)finishCourtText(false);
+ const visible=p.full?(step().id?[step()]:[]):courtSheetPage(p).steps;
+ status.hidden=false;
+ if(!visible.length){status.textContent='Abre una jugada con canchas para copiar su vista.';return;}
+ resetCourtImage();
+ const request={};courtImageRequest=request;
+ const active=()=>dialog.open&&courtImageRequest===request;
+ status.hidden=false;status.textContent='Preparando imagen…';button.disabled=true;
  try{
-  const images=[],total=selection.plays.reduce((sum,p)=>sum+p.steps.length,0);
-  for(const p of selection.plays){
-   for(const [index,step] of p.steps.entries()){
-    status.textContent='Preparando imagen '+(images.length+1)+' de '+total+'…';
-    const file=await renderSharedPng(p,step,index);
-    if(!active())return;
-    images.push(file);
-   }
+  const png=renderVisibleCourtImage(visibleCourtImageMarkup(p,visible));
+  try{
+   if(!navigator.clipboard?.write||typeof ClipboardItem!=='function')throw Error('Portapapeles no disponible');
+   await navigator.clipboard.write([new ClipboardItem({'image/png':png.then(blob=>{
+    if(!active())throw Error('Se cerró el cuadro de compartir.');
+    return blob;
+   })})]);
+   if(active())status.textContent='Imagen copiada. Ya puedes pegarla en el chat.';
+  }catch(error){
+   const blob=await png;
+   if(!active())return;
+   courtImageUrl=URL.createObjectURL(blob);
+   const name=String(p.name||'Jugada').replace(/[^\p{L}\p{N} _-]+/gu,'').trim().slice(0,65)||'Jugada';
+   link.href=courtImageUrl;link.download=name+'.png';link.hidden=false;
+   status.textContent='El navegador no pudo copiar la imagen. Puedes descargarla.';
   }
-  sharedImageFiles=images;
-  for(const file of images){
-   const url=URL.createObjectURL(file);sharedImageUrls.push(url);
-   const item=document.createElement('li'),link=document.createElement('a');
-   link.href=url;link.download=file.name;link.textContent=file.name;item.append(link);list.append(item);
-  }
-  list.hidden=false;
-  status.textContent=navigator.share&&navigator.canShare?.({files:images})
-   ?'Imágenes listas. Pulsa Enviar imágenes de nuevo para compartirlas.'
-   :'Imágenes listas. Descárgalas y adjúntalas en tu chat.';
  }catch(error){
-  if(active())status.textContent='No se pudieron preparar las imágenes. Vuelve a intentar.';
+  if(active())status.textContent='No se pudo preparar la imagen. Vuelve a intentar.';
  }finally{
-  if(active()){sharedImageRequest=null;button.disabled=false;}
+  if(active()){courtImageRequest=null;button.disabled=false;}
  }
 }
 function openSharedPdf(){
