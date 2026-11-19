@@ -187,29 +187,36 @@ function smoothMotionTime(value){
 function interpolateCourtPoint(a,b,t){
  return {x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t};
 }
-function createCourtMotion(svg,elements,full,motion){
- const {initial,actions,ball,ballPosition,syntheticBall,entryPositions,entryBall}=motion;
- drawPlaybackCourt(svg,elements,full,syntheticBall?elementSVG(ball):'');
- const nodes=new Map([...svg.querySelectorAll('[data-id]')].map(node=>[node.getAttribute('data-id'),node]));
- const place=(id,p)=>nodes.get(String(id))?.setAttribute('transform','translate('+p.x+' '+p.y+')');
- const ballNode=ball?nodes.get(String(ball.id)):null;
- return {draw(time){
+function sampleCourtMotion(motion,time){
+ const {initial,actions,ballPosition,entryPositions,entryBall}=motion;
+ const positions=new Map();
   const entry=smoothMotionTime(time/300);
   for(const [id,point] of initial){
    const start=entry<1?entryPositions?.get(id):null;
-   place(id,start?interpolateCourtPoint(start,point,entry):point);
+   positions.set(id,start?interpolateCourtPoint(start,point,entry):point);
   }
   let currentBall=entry<1&&entryBall&&ballPosition?interpolateCourtPoint(entryBall,ballPosition,entry):ballPosition;
   for(const action of actions){
    if(time<action.start)break;
    const point=action.path(smoothMotionTime((time-action.start)/(action.end-action.start)));
-   if(action.actor!==undefined)place(action.actor,point);
+   if(action.actor!==undefined)positions.set(action.actor,point);
    if(action.pass||action.carry)currentBall=action.pass?point:courtBallOffset(point);
    if(time<action.end)break;
   }
+ return {positions,ball:currentBall};
+}
+function createCourtMotion(svg,elements,full,motion){
+ const {ball,syntheticBall}=motion;
+ drawPlaybackCourt(svg,elements,full,syntheticBall?elementSVG(ball):'');
+ const nodes=new Map([...svg.querySelectorAll('[data-id]')].map(node=>[node.getAttribute('data-id'),node]));
+ const place=(id,p)=>nodes.get(String(id))?.setAttribute('transform','translate('+p.x+' '+p.y+')');
+ const ballNode=ball?nodes.get(String(ball.id)):null;
+ return {draw(time){
+  const pose=sampleCourtMotion(motion,time);
+  for(const [id,point] of pose.positions)place(id,point);
   if(ballNode){
-   ballNode.setAttribute('visibility',currentBall?'visible':'hidden');
-   if(currentBall)place(ball.id,currentBall);
+   ballNode.setAttribute('visibility',pose.ball?'visible':'hidden');
+   if(pose.ball)place(ball.id,pose.ball);
   }
  }};
 }
