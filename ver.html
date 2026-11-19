@@ -19,6 +19,8 @@ figcaption{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:.75rem}
 nav{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-top:.75rem}
 button{min-height:44px;padding:.5rem .8rem;border:0;border-radius:.4rem;background:#00729e;color:white;font:inherit}
 button:disabled{opacity:.45}
+.sequence-controls{flex-wrap:wrap;justify-content:center}
+.sequence-controls select{min-height:44px;padding:0 .4rem;border:1px solid #a7b9c8;border-radius:.4rem;background:white;color:inherit;font:inherit}
 #play-picker{display:block;margin:0 0 1rem}
 #play-picker[hidden]{display:none}
 #play-choice{display:block;width:100%;margin-top:.3rem;padding:.65rem;border:1px solid #a7b9c8;border-radius:.4rem;background:#fff;color:inherit;font:inherit}
@@ -30,10 +32,11 @@ button:disabled{opacity:.45}
  <section id="play" hidden>
   <h2 id="step"></h2>
   <figure><img id="court" alt="Diagrama de la cancha"><figcaption id="notes"></figcaption></figure>
-  <nav aria-label="Secuencias"><button id="previous" type="button">Anterior</button><span id="position" aria-live="polite"></span><button id="next" type="button">Siguiente</button></nav>
+  <nav class="sequence-controls" aria-label="Controles de secuencia"><button id="previous" type="button">Anterior</button><button id="toggle" type="button">Reproducir</button><button id="next" type="button">Siguiente</button><label>Velocidad <select id="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></label><span id="position" aria-live="polite"></span></nav>
  </section>
 </main>
 <script src="./court-svg.js"></script>
+<script src="./sequence-playback.js"></script>
 <script>
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const byId=id=>document.getElementById(id);
@@ -71,10 +74,9 @@ async function readSharedPlay(){
 async function showSharedPlay(){
  try{
   const data=await readSharedPlay();
-  let index=0,imageUrl,selectedPlay=data.plays[0];
-  const previous=byId('previous'),next=byId('next'),court=byId('court');
-  function render(){
-   const step=selectedPlay.steps[index];
+  let imageUrl,selectedPlay=data.plays[0];
+  const court=byId('court');
+  function render(step,index){
    if(imageUrl)URL.revokeObjectURL(imageUrl);
    // Keep shared SVG in an image context, where scripts are disabled.
    // Older links may contain a dribble arrow serialized without an attribute value.
@@ -85,21 +87,17 @@ async function showSharedPlay(){
    byId('step').textContent=step.name||'Secuencia '+(index+1);
    byId('notes').textContent=step.notes;
    byId('notes').hidden=!step.notes;
-   byId('position').textContent=(index+1)+' de '+selectedPlay.steps.length;
-   previous.disabled=index===0;
-   next.disabled=index===selectedPlay.steps.length-1;
   }
+  const playback=createSequencePlayback({previous:byId('previous'),next:byId('next'),toggle:byId('toggle'),speed:byId('speed'),position:byId('position'),render});
   byId('title').textContent=data.name;
   document.title=data.name+' · Design Play';
   if(data.folder){
    const choice=byId('play-choice');
    data.plays.forEach((play,i)=>choice.add(new Option(play.name,String(i))));
-   choice.onchange=()=>{selectedPlay=data.plays[Number(choice.value)];index=0;render()};
+   choice.onchange=()=>{selectedPlay=data.plays[Number(choice.value)];playback.load(selectedPlay.steps)};
    byId('play-picker').hidden=false;
   }
-  previous.onclick=()=>{if(index>0){index--;render()}};
-  next.onclick=()=>{if(index<selectedPlay.steps.length-1){index++;render()}};
-  render();
+  playback.load(selectedPlay.steps);
   byId('play').hidden=false;
   message.hidden=true;
  }catch(error){
