@@ -425,6 +425,8 @@ body:not(.light) .board.court-sheet{background:transparent}
 .light .court-space .board:not(.court-sheet){background:#FFFFFF}
 .library .row>[data-shareplay],.library .row>[data-sharefolder],.library .row>[data-playback]{display:grid;place-items:center}
 .library .row>[data-playback]{font-size:15px}
+.library .row.play .tree-actions{display:flex;visibility:hidden}
+.library .row.play:hover .tree-actions,.library .row.play:focus-within .tree-actions,.library .row.play:has(.tree-menu[open]) .tree-actions{visibility:visible}
 .library .row>[data-playback]:hover{outline:1px solid currentColor}
 .library [data-shareplay] svg,.library [data-sharefolder] svg{width:17px;height:17px;pointer-events:none}
 .library [data-shareplay]:hover,.library [data-sharefolder]:hover{outline:1px solid currentColor}
