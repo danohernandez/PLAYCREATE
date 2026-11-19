@@ -135,7 +135,7 @@ function prepareCourtMotion(elements){
  const needsBall=actions.some(action=>action.pass||action.carry);
  const syntheticBall=!ball&&needsBall;
  if(syntheticBall)ball={id:'playback-ball',type:'ball',x:0,y:0,size:20};
- return {initial,actions,ball,ballPosition,syntheticBall,animated:actions.length>0,duration:actions.length?cursor+450:1300};
+ return {initial,actions,ball,ballPosition,syntheticBall,animated:actions.length>0,duration:actions.length?Math.ceil(cursor+450):1300};
 }
 function drawPlaybackCourt(svg,elements,full,extra=''){
  svg.setAttribute('viewBox','0 0 600 '+(full?1060:600));

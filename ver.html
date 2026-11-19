@@ -50,8 +50,8 @@ button:disabled{opacity:.45}
   <nav class="sequence-controls" aria-label="Controles de reproducción"><input id="progress" type="range" min="0" value="0" step="1" aria-label="Progreso del video"><div class="sequence-controls-row"><button id="toggle" type="button" title="Reproducir" aria-label="Reproducir">▶</button><button id="previous" type="button" title="Secuencia anterior" aria-label="Secuencia anterior">⏮</button><button id="next" type="button" title="Secuencia siguiente" aria-label="Secuencia siguiente">⏭</button><span id="clock">0:00 / 0:00</span><span id="position" class="sequence-position" aria-live="polite"></span><select id="speed" aria-label="Velocidad" title="Velocidad"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select><button id="fullscreen" type="button" title="Pantalla completa" aria-label="Pantalla completa">⛶</button></div></nav>
  </section>
 </main>
-<script src="./court-svg.js?v=92"></script>
-<script src="./sequence-playback.js?v=92"></script>
+<script src="./court-svg.js?v=93"></script>
+<script src="./sequence-playback.js?v=93"></script>
 <script>
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const byId=id=>document.getElementById(id);
