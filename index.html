@@ -1075,6 +1075,7 @@ function updateWorkspaceScrollbars(space,limits,visible){
    const spacer=document.createElement('div');spacer.setAttribute('aria-hidden','true');
    bar.append(spacer);space.append(bar);
    bar.addEventListener('wheel',event=>event.stopPropagation());
+   bar.addEventListener('keydown',event=>event.stopPropagation());
    bar.addEventListener('scroll',()=>{
     if(bar.hidden||bar[position]===Number(bar.dataset.position))return;
     const range=bar[extent]-bar[viewport],limit=Number(bar.dataset.limit);
