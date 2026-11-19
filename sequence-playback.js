@@ -95,10 +95,13 @@ function courtMotionPath(arrow,start){
 }
 
 const isCourtArrow=element=>['move','dribble','pass','screen'].includes(element.type);
+const isCourtAction=element=>isCourtArrow(element)||element.type==='marker';
+const courtBallOffset=point=>({x:point.x+21,y:point.y+6});
 function prepareCourtMotion(elements){
  // Arrows are acted on in drawing order. Their start points identify nearby players.
  const actors=elements.filter(e=>e.type==='player'||e.type==='defender');
- const arrows=elements.filter(e=>isCourtArrow(e)&&Number.isFinite(e.ex)&&Number.isFinite(e.ey));
+ const players=actors.filter(e=>e.type==='player');
+ const commands=elements.filter(e=>e.type==='marker'||(isCourtArrow(e)&&Number.isFinite(e.ex)&&Number.isFinite(e.ey)));
  const initial=new Map(actors.map(e=>[e.id,{x:e.x,y:e.y}]));
  const positions=new Map(initial),actions=[];
  let ball=elements.find(e=>e.type==='ball');
@@ -111,11 +114,27 @@ function prepareCourtMotion(elements){
   }
   return id;
  };
- let holder=actors.some(e=>e.id===ball?.holder)?ball.holder:ballPosition?nearest(ballPosition,actors,30):undefined;
- let cursor=300;
- for(const arrow of arrows){
+ let holder=ball&&actors.some(e=>e.id===ball.holder)?ball.holder:ballPosition?nearest(ballPosition,actors,30):undefined;
+ let finalBallPosition=ballPosition,cursor=300;
+ for(const arrow of commands){
+  if(arrow.type==='marker'){
+   const nearby=players.filter(player=>{
+    const point=positions.get(player.id);
+    return Math.hypot(point.x-arrow.x,point.y-arrow.y)<=85;
+   });
+   const from=holder??nearest(arrow,nearby,86);
+   if(from===undefined||!nearby.some(player=>player.id===from))continue;
+   const to=nearest(arrow,nearby.filter(player=>player.id!==from),86);
+   if(to===undefined)continue;
+   const start=finalBallPosition??courtBallOffset(positions.get(from));
+   const end=courtBallOffset(positions.get(to));
+   const path=courtMotionPath({ex:end.x,ey:end.y},start);
+   actions.push({pass:true,path,start:cursor,end:cursor+320});
+   cursor+=320;holder=to;finalBallPosition=end;
+   continue;
+  }
   const pass=arrow.type==='pass',dribble=arrow.type==='dribble';
-  const actor=pass?undefined:nearest(arrow,dribble?actors.filter(e=>e.type==='player'):actors);
+  const actor=pass?undefined:nearest(arrow,dribble?players:actors);
   if(!pass&&actor===undefined)continue;
   const start=pass?{x:arrow.x,y:arrow.y}:positions.get(actor);
   if(Math.hypot(arrow.ex-start.x,arrow.ey-start.y)<3)continue;
@@ -126,24 +145,24 @@ function prepareCourtMotion(elements){
   actions.push({actor,pass,carry,path,start:cursor,end:cursor+duration});
   cursor+=duration;
   const end=path(1);
-  if(pass)holder=nearest(end,actors,34);
+  if(pass){holder=nearest(end,actors,34);finalBallPosition=end;}
   else{
    positions.set(actor,end);
    if(dribble)holder=actor;
+   if(carry)finalBallPosition=courtBallOffset(end);
   }
  }
  const needsBall=actions.some(action=>action.pass||action.carry);
  const syntheticBall=!ball&&needsBall;
  if(syntheticBall)ball={id:'playback-ball',type:'ball',x:0,y:0,size:20};
- return {initial,actions,ball,ballPosition,syntheticBall,animated:actions.length>0,duration:actions.length?Math.ceil(cursor+450):1300};
+ return {initial,actions,ball,ballPosition,syntheticBall,finalPositions:positions,finalBallPosition,finalHolder:holder,animated:actions.length>0,duration:actions.length?Math.ceil(cursor+450):1300};
 }
 function drawPlaybackCourt(svg,elements,full,extra=''){
  svg.setAttribute('viewBox','0 0 600 '+(full?1060:600));
- svg.innerHTML=(full?courtBase(true):referenceCourt())+elements.filter(e=>!isCourtArrow(e)).map(elementSVG).join('')+extra;
+ svg.innerHTML=(full?courtBase(true):referenceCourt())+elements.filter(e=>!isCourtAction(e)).map(elementSVG).join('')+extra;
 }
 function createCourtMotion(svg,elements,full,motion){
  const {initial,actions,ball,ballPosition,syntheticBall}=motion;
- const offset=point=>({x:point.x+21,y:point.y+6});
  drawPlaybackCourt(svg,elements,full,syntheticBall?elementSVG(ball):'');
  const nodes=new Map([...svg.querySelectorAll('[data-id]')].map(node=>[node.getAttribute('data-id'),node]));
  const place=(id,p)=>nodes.get(String(id))?.setAttribute('transform','translate('+p.x+' '+p.y+')');
@@ -155,7 +174,7 @@ function createCourtMotion(svg,elements,full,motion){
    if(time<action.start)break;
    const point=action.path(Math.min(1,(time-action.start)/(action.end-action.start)));
    if(action.actor!==undefined)place(action.actor,point);
-   if(action.pass||action.carry)currentBall=action.pass?point:offset(point);
+   if(action.pass||action.carry)currentBall=action.pass?point:courtBallOffset(point);
    if(time<action.end)break;
   }
   if(ballNode){
