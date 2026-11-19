@@ -14,7 +14,8 @@ header p{margin:0;color:#486075;font-size:.875rem}
 h1{font-size:clamp(1.4rem,5vw,2rem);margin:.2rem 0;overflow-wrap:anywhere}
 h2{font-size:1.1rem;margin:0 0 .5rem;overflow-wrap:anywhere}
 figure{margin:0;background:#fff;border:1px solid #d6e0e8;border-radius:.75rem;padding:.75rem}
-img{display:block;width:100%;height:auto;max-height:65vh;object-fit:contain}
+figure img,figure svg{display:block;width:100%;height:auto;max-height:65vh;object-fit:contain}
+figure [hidden]{display:none}
 figcaption{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:.75rem}
 nav{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-top:.75rem}
 button{min-height:44px;padding:.5rem .8rem;border:0;border-radius:.4rem;background:#00729e;color:white;font:inherit}
@@ -31,7 +32,7 @@ button:disabled{opacity:.45}
  <label id="play-picker" hidden>Jugada<select id="play-choice"></select></label>
  <section id="play" hidden>
   <h2 id="step"></h2>
-  <figure><img id="court" alt="Diagrama de la cancha"><figcaption id="notes"></figcaption></figure>
+  <figure><img id="court" alt="Diagrama de la cancha" hidden><svg id="animated-court" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama de la cancha" hidden></svg><figcaption id="notes"></figcaption></figure>
   <nav class="sequence-controls" aria-label="Controles de secuencia"><button id="previous" type="button">Anterior</button><button id="toggle" type="button">Reproducir</button><button id="next" type="button">Siguiente</button><label>Velocidad <select id="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></label><span id="position" aria-live="polite"></span></nav>
  </section>
 </main>
@@ -75,18 +76,23 @@ async function showSharedPlay(){
  try{
   const data=await readSharedPlay();
   let imageUrl,selectedPlay=data.plays[0];
-  const court=byId('court');
+  const court=byId('court'),animatedCourt=byId('animated-court');
   function render(step,index){
-   if(imageUrl)URL.revokeObjectURL(imageUrl);
-   // Keep shared SVG in an image context, where scripts are disabled.
-   // Older links may contain a dribble arrow serialized without an attribute value.
-   const svg=step.svg?.replace(/<path data-dribble-arrowhead(?=\s+d=)/g,'<path data-dribble-arrowhead=""')
-    ??renderSharedCourt(step.elements,selectedPlay.full);
-   imageUrl=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));
-   court.src=imageUrl;
+   if(imageUrl){URL.revokeObjectURL(imageUrl);imageUrl=null;}
    byId('step').textContent=step.name||'Secuencia '+(index+1);
    byId('notes').textContent=step.notes;
    byId('notes').hidden=!step.notes;
+   const canAnimate=Array.isArray(step.elements);
+   animatedCourt.toggleAttribute('hidden',!canAnimate);
+   court.hidden=canAnimate;
+   if(canAnimate){
+    court.removeAttribute('src');
+    return createCourtMotion(animatedCourt,unpackSharedElements(step.elements),selectedPlay.full);
+   }
+   // Older links contain a pre-rendered SVG. Keep it in an image context.
+   const svg=step.svg.replace(/<path data-dribble-arrowhead(?=\s+d=)/g,'<path data-dribble-arrowhead=""');
+   imageUrl=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));
+   court.src=imageUrl;
   }
   const playback=createSequencePlayback({previous:byId('previous'),next:byId('next'),toggle:byId('toggle'),speed:byId('speed'),position:byId('position'),render});
   byId('title').textContent=data.name;

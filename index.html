@@ -679,9 +679,9 @@ function exportDialog(){$('exportInfo').textContent=selected.size?selected.size+
 const editorPlayback=createSequencePlayback({
  previous:$('playback-previous'),next:$('playback-next'),toggle:$('playback-toggle'),speed:$('playback-speed'),position:$('playback-position'),
  render(frame,index){
-  playbackCourt.innerHTML=frame.svg;
   $('playback-step').textContent=frame.name||'Secuencia '+(index+1);
   $('playback-notes').textContent=frame.notes||'';
+  return createCourtMotion(playbackCourt,frame.elements,frame.full);
  }
 });
 playbackDialog.addEventListener('close',editorPlayback.stop);
@@ -696,20 +696,20 @@ function openLibraryPlayback(id){
  if(activeCourtText)finishCourtText(false);
  const p=state.plays.find(item=>item.id===id);
  if(!p?.steps.length){alert('Agrega una secuencia para reproducir la jugada.');return;}
- const t=projection(p.full);
- playbackCourt.setAttribute('viewBox','0 0 '+t.w+' '+t.h);
  $('playback-title').textContent=p.name;
  playbackDialog.showModal();
- editorPlayback.load(p.steps.map(step=>({name:step.name,notes:step.notes,svg:sceneSVG(step,p.full)})),true);
+ editorPlayback.load(p.steps.map(step=>({name:step.name,notes:step.notes,elements:projectSceneElements(step,p.full),full:p.full})),true);
 }
 function snapshotSharedPlay(p){
  return {
   name:String(p.name||'Jugada'),
   full:!!p.full,
-  steps:p.steps.map(st=>({
-   name:String(st.name||''),notes:String(st.notes||''),
-   elements:projectSceneElements(st,p.full).map(packSharedElement)
-  }))
+  steps:p.steps.map(st=>{
+   const projected=projectSceneElements(st,p.full);
+   const indices=new Map(projected.map((element,index)=>[element.id,index]));
+   return {name:String(st.name||''),notes:String(st.notes||''),
+    elements:projected.map(element=>packSharedElement(element,indices.get(element.holder)))};
+  })
  };
 }
 function openLibraryShare(type,id){

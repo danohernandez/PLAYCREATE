@@ -35,26 +35,25 @@ function elementSVG(e){if(e.type==='highlight')return highlightSVG(e);let c=['mo
 
 function referenceCourt(){return '<rect width="600" height="600" fill="#FFFFFF"/><g transform="translate(0 20)">'+courtBase(false)+'</g>'}
 const sharedElementTypes=['player','defender','ball','text','cone','marker','move','pass','dribble','screen','highlight'];
-function packSharedElement(e){
+function packSharedElement(e,holderIndex){
  const fields=[sharedElementTypes.indexOf(e.type),e.x,e.y,e.size,e.width,e.ex,e.ey,e.cx,e.cy,e.rx,e.ry,e.n,e.color,e.align,e.lineShape==='angle'?1:null,e.kind==='zone'?1:null,(e.bold?1:0)|(e.underline?2:0)|(e.strike?4:0)];
- if(!fields[16])fields.pop();
+ if(Number.isInteger(holderIndex)&&holderIndex>=0)fields.push(holderIndex);
+ else if(!fields[16])fields.pop();
  while(fields.length>3&&fields.at(-1)==null)fields.pop();
  return fields.map(value=>typeof value==='number'&&Math.abs(value)<100000?Math.round(value*10)/10:value);
 }
-function renderSharedCourt(elements,full){
+function unpackSharedElements(elements){
  const number=value=>typeof value==='number'&&Number.isFinite(value)?Math.max(-2000,Math.min(2000,value)):undefined;
- const height=full?1060:600;
- const shapes=elements.map((fields,index)=>{
-  if(!Array.isArray(fields))return '';
-  const [kind,x,y,size,width,ex,ey,cx,cy,rx,ry,n,color,align,angle,zone,format]=fields;
+ return elements.flatMap((fields,index)=>{
+  if(!Array.isArray(fields))return [];
+  const [kind,x,y,size,width,ex,ey,cx,cy,rx,ry,n,color,align,angle,zone,format,holder]=fields;
   const type=Number.isInteger(kind)?sharedElementTypes[kind]:undefined;
-  if(!type||number(x)==null||number(y)==null)return '';
-  return elementSVG({type,id:index,x:number(x),y:number(y),size:number(size),width:number(width),
+  if(!type||number(x)==null||number(y)==null)return [];
+  return [{type,id:index,holder:Number.isInteger(holder)?holder:undefined,x:number(x),y:number(y),size:number(size),width:number(width),
    ex:number(ex),ey:number(ey),cx:number(cx),cy:number(cy),rx:number(rx),ry:number(ry),
    n:typeof n==='number'||typeof n==='string'?n:'',
-   color:typeof color==='string'?color:undefined,
+   color:typeof color==='string'&&/^#[a-f0-9]{3,8}$/i.test(color)?color:'#0C1D32',
    align:['start','middle','end'].includes(align)?align:'middle',lineShape:angle===1?'angle':undefined,kind:zone===1?'zone':undefined,
-   bold:!!(format&1),underline:!!(format&2),strike:!!(format&4)});
- }).join('');
- return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 '+height+'">'+(full?courtBase(true):referenceCourt())+shapes+'</svg>';
+   bold:!!(format&1),underline:!!(format&2),strike:!!(format&4)}];
+ });
 }
