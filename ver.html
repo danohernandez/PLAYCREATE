@@ -19,10 +19,14 @@ figcaption{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:.75rem}
 nav{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-top:.75rem}
 button{min-height:44px;padding:.5rem .8rem;border:0;border-radius:.4rem;background:#00729e;color:white;font:inherit}
 button:disabled{opacity:.45}
+#play-picker{display:block;margin:0 0 1rem}
+#play-picker[hidden]{display:none}
+#play-choice{display:block;width:100%;margin-top:.3rem;padding:.65rem;border:1px solid #a7b9c8;border-radius:.4rem;background:#fff;color:inherit;font:inherit}
 </style>
 <main>
  <header><p>Design Play · Solo lectura</p><h1 id="title">Jugada compartida</h1></header>
  <p id="message" role="status">Cargando jugada…</p>
+ <label id="play-picker" hidden>Jugada<select id="play-choice"></select></label>
  <section id="play" hidden>
   <h2 id="step"></h2>
   <figure><img id="court" alt="Diagrama de la cancha"><figcaption id="notes"></figcaption></figure>
@@ -45,19 +49,20 @@ async function readSharedPlay(){
  }});
  const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip')).pipeThrough(limit);
  const data=JSON.parse(await new Response(stream).text());
- if(typeof data?.name!=='string'||!Array.isArray(data.steps)||!data.steps.length||
-    !data.steps.every(step=>typeof step?.name==='string'&&typeof step.notes==='string'&&typeof step.svg==='string')){
-  throw Error('Jugada inválida');
- }
- return data;
+ const isPlay=play=>typeof play?.name==='string'&&Array.isArray(play.steps)&&play.steps.length>0&&
+  play.steps.every(step=>typeof step?.name==='string'&&typeof step.notes==='string'&&typeof step.svg==='string');
+ const folder=Array.isArray(data?.plays);
+ const plays=folder?data.plays:[data];
+ if(typeof data?.name!=='string'||!plays.length||!plays.every(isPlay))throw Error('Contenido inválido');
+ return {name:data.name,plays,folder};
 }
 async function showSharedPlay(){
  try{
   const data=await readSharedPlay();
-  let index=0,imageUrl;
+  let index=0,imageUrl,selectedPlay=data.plays[0];
   const previous=byId('previous'),next=byId('next'),court=byId('court');
   function render(){
-   const step=data.steps[index];
+   const step=selectedPlay.steps[index];
    if(imageUrl)URL.revokeObjectURL(imageUrl);
    // Keep shared SVG in an image context, where scripts are disabled.
    imageUrl=URL.createObjectURL(new Blob([step.svg],{type:'image/svg+xml'}));
@@ -65,19 +70,25 @@ async function showSharedPlay(){
    byId('step').textContent=step.name||'Secuencia '+(index+1);
    byId('notes').textContent=step.notes;
    byId('notes').hidden=!step.notes;
-   byId('position').textContent=(index+1)+' de '+data.steps.length;
+   byId('position').textContent=(index+1)+' de '+selectedPlay.steps.length;
    previous.disabled=index===0;
-   next.disabled=index===data.steps.length-1;
+   next.disabled=index===selectedPlay.steps.length-1;
   }
   byId('title').textContent=data.name;
   document.title=data.name+' · Design Play';
+  if(data.folder){
+   const choice=byId('play-choice');
+   data.plays.forEach((play,i)=>choice.add(new Option(play.name,String(i))));
+   choice.onchange=()=>{selectedPlay=data.plays[Number(choice.value)];index=0;render()};
+   byId('play-picker').hidden=false;
+  }
   previous.onclick=()=>{if(index>0){index--;render()}};
-  next.onclick=()=>{if(index<data.steps.length-1){index++;render()}};
+  next.onclick=()=>{if(index<selectedPlay.steps.length-1){index++;render()}};
   render();
   byId('play').hidden=false;
   message.hidden=true;
  }catch(error){
-  message.textContent='No se pudo abrir la jugada. Pide que te envíen el enlace completo y ábrelo en un navegador actualizado.';
+  message.textContent='No se pudo abrir el contenido compartido. Pide que te envíen el enlace completo y ábrelo en un navegador actualizado.';
  }
 }
 showSharedPlay();
