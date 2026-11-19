@@ -20,8 +20,22 @@ figcaption{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:.75rem}
 nav{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-top:.75rem}
 button{min-height:44px;padding:.5rem .8rem;border:0;border-radius:.4rem;background:#00729e;color:white;font:inherit}
 button:disabled{opacity:.45}
-.sequence-controls{flex-wrap:wrap;justify-content:center}
-.sequence-controls select{min-height:44px;padding:0 .4rem;border:1px solid #a7b9c8;border-radius:.4rem;background:white;color:inherit;font:inherit}
+.sequence-controls{display:grid;gap:2px;padding:7px 10px;border-radius:8px;background:#142436;color:#fff;margin:0;font:14px system-ui,sans-serif}
+.sequence-controls input[type=range]{display:block;width:100%;min-height:23px;margin:0;accent-color:#83d7ff;background:transparent;cursor:pointer}
+.sequence-controls-row{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.sequence-controls .sequence-position{margin-inline-start:auto;white-space:nowrap}
+.sequence-controls button,.sequence-controls select{min-width:37px;min-height:40px;padding:4px 7px;border:1px solid transparent;border-radius:4px;background:transparent;color:inherit;font:inherit}
+.sequence-controls button{font-size:18px;line-height:1;cursor:pointer}
+.sequence-controls button:hover,.sequence-controls select:hover{border-color:#83d7ff}
+.sequence-controls button:disabled{opacity:.42;cursor:default}
+.sequence-controls button[hidden]{display:none}
+.sequence-controls select option{background:#142436;color:#fff}
+.sequence-controls-row span{font-variant-numeric:tabular-nums;white-space:nowrap}
+.sequence-stage:fullscreen{width:100%;height:100%;margin:0;padding:12px;background:#f4f7fa;color:#0c1d32;overflow:auto}
+.sequence-controls{margin-top:.75rem}
+.sequence-stage:fullscreen{display:flex;flex-direction:column}
+.sequence-stage:fullscreen figure{flex:1;min-height:0;display:grid;grid-template-rows:minmax(0,1fr) auto}
+.sequence-stage:fullscreen figure img,.sequence-stage:fullscreen figure svg{height:100%;max-height:none}
 #play-picker{display:block;margin:0 0 1rem}
 #play-picker[hidden]{display:none}
 #play-choice{display:block;width:100%;margin-top:.3rem;padding:.65rem;border:1px solid #a7b9c8;border-radius:.4rem;background:#fff;color:inherit;font:inherit}
@@ -30,14 +44,14 @@ button:disabled{opacity:.45}
  <header><p>Design Play · Solo lectura</p><h1 id="title">Jugada compartida</h1></header>
  <p id="message" role="status">Cargando jugada…</p>
  <label id="play-picker" hidden>Jugada<select id="play-choice"></select></label>
- <section id="play" hidden>
+ <section id="play" class="sequence-stage" hidden>
   <h2 id="step"></h2>
   <figure><img id="court" alt="Diagrama de la cancha" hidden><svg id="animated-court" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama de la cancha" hidden></svg><figcaption id="notes"></figcaption></figure>
-  <nav class="sequence-controls" aria-label="Controles de secuencia"><button id="previous" type="button">Anterior</button><button id="toggle" type="button">Reproducir</button><button id="next" type="button">Siguiente</button><label>Velocidad <select id="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></label><span id="position" aria-live="polite"></span></nav>
+  <nav class="sequence-controls" aria-label="Controles de reproducción"><input id="progress" type="range" min="0" value="0" step="1" aria-label="Progreso del video"><div class="sequence-controls-row"><button id="toggle" type="button" title="Reproducir" aria-label="Reproducir">▶</button><button id="previous" type="button" title="Secuencia anterior" aria-label="Secuencia anterior">⏮</button><button id="next" type="button" title="Secuencia siguiente" aria-label="Secuencia siguiente">⏭</button><span id="clock">0:00 / 0:00</span><span id="position" class="sequence-position" aria-live="polite"></span><select id="speed" aria-label="Velocidad" title="Velocidad"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select><button id="fullscreen" type="button" title="Pantalla completa" aria-label="Pantalla completa">⛶</button></div></nav>
  </section>
 </main>
-<script src="./court-svg.js?v=90"></script>
-<script src="./sequence-playback.js?v=90"></script>
+<script src="./court-svg.js?v=92"></script>
+<script src="./sequence-playback.js?v=92"></script>
 <script>
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const byId=id=>document.getElementById(id);
@@ -82,28 +96,35 @@ async function showSharedPlay(){
    byId('step').textContent=step.name||'Secuencia '+(index+1);
    byId('notes').textContent=step.notes;
    byId('notes').hidden=!step.notes;
-   const canAnimate=Array.isArray(step.elements);
+   const canAnimate=!!step.motion;
    animatedCourt.toggleAttribute('hidden',!canAnimate);
    court.hidden=canAnimate;
    if(canAnimate){
     court.removeAttribute('src');
-    return createCourtMotion(animatedCourt,unpackSharedElements(step.elements),selectedPlay.full);
+    return createCourtMotion(animatedCourt,step.elements,step.full,step.motion);
    }
    // Older links contain a pre-rendered SVG. Keep it in an image context.
    const svg=step.svg.replace(/<path data-dribble-arrowhead(?=\s+d=)/g,'<path data-dribble-arrowhead=""');
    imageUrl=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));
    court.src=imageUrl;
   }
-  const playback=createSequencePlayback({previous:byId('previous'),next:byId('next'),toggle:byId('toggle'),speed:byId('speed'),position:byId('position'),render});
+  const playback=createSequencePlayback({previous:byId('previous'),next:byId('next'),toggle:byId('toggle'),speed:byId('speed'),position:byId('position'),progress:byId('progress'),clock:byId('clock'),fullscreen:byId('fullscreen'),fullscreenTarget:byId('play'),render});
+  function loadPlay(play){
+   playback.load(play.steps.map(step=>{
+    if(!Array.isArray(step.elements))return step;
+    const elements=unpackSharedElements(step.elements);
+    return {...step,elements,full:play.full,motion:prepareCourtMotion(elements)};
+   }));
+  }
   byId('title').textContent=data.name;
   document.title=data.name+' · Design Play';
   if(data.folder){
    const choice=byId('play-choice');
    data.plays.forEach((play,i)=>choice.add(new Option(play.name,String(i))));
-   choice.onchange=()=>{selectedPlay=data.plays[Number(choice.value)];playback.load(selectedPlay.steps)};
+   choice.onchange=()=>{selectedPlay=data.plays[Number(choice.value)];loadPlay(selectedPlay)};
    byId('play-picker').hidden=false;
   }
-  playback.load(selectedPlay.steps);
+  loadPlay(selectedPlay);
   byId('play').hidden=false;
   message.hidden=true;
  }catch(error){
