@@ -430,10 +430,10 @@ body:not(.light) .board.court-sheet{background:transparent}
 #share-play::backdrop{background:#0c1d3280}
 #share-play h2{margin:0 0 12px;font-size:22px}
 #share-play input{width:100%;padding:8px;background:#fff;color:#0c1d32}
-#share-play footer{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+#share-play footer{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin-top:14px}
 #share-play button{padding:7px 12px;background:#00729e;color:#fff;border:0}
 #share-play button:disabled{opacity:.45}
-</style><script src="./court-svg.js"></script><body><dialog id="share-play" aria-labelledby="share-play-title"><h2 id="share-play-title">Compartir jugada</h2><p id="share-status" role="status"></p><input id="shared-link" aria-label="Enlace de solo lectura" readonly><form method="dialog"><footer><button type="submit">Cerrar</button><button id="copy-shared-link" type="button" onclick="copySharedPlayLink()" disabled>Copiar enlace</button></footer></form></dialog><div id="app-frame"><header class="top"><div class="brand"><img src="/PLAYCREATE/icon-192-flat.png" width="46" height="46" style="border-radius:10px" alt="Logo Design Play">DESIGN PLAY</div><h1 id="title" class="work-title" aria-label="Jugada o drill actual" aria-live="polite"></h1><span id="save">Guardado</span><button class="head-action undo" onclick="undo()" title="Deshacer">↶</button><button class="head-action redo" onclick="redo()" title="Rehacer">↷</button><button class="head-action theme" onclick="theme()" title="Tema claro u oscuro">☀</button><button class="primary export-button" onclick="exportDialog()">⇧ Exportar PDF</button></header><div class="layout"><aside><h3 class="library-title">BIBLIOTECA</h3><input id="search" placeholder="⌕   Buscar jugadas..." oninput="library()"><button class="new-play create-folder-text" onclick="addFolder()">+ Crear carpeta</button><div class="library" id="library" role="tree" aria-multiselectable="true" aria-label="Carpetas y jugadas"></div><div class="utility"><button onclick="backup()">Respaldo</button><button onclick="$('file').click()">Importar</button></div><span id="count" hidden></span><input hidden id="file" type="file" accept=".json"></aside><main><div class="tools" id="tools" aria-label="Herramientas de dibujo"></div><div class="toolbar"><button id="half" onclick="setCourt(false)">⚿　Media cancha</button><button id="full" onclick="setCourt(true)">⚿　Cancha completa</button><select hidden id="lineShape"><option value="straight">Recta</option></select><span hidden id="zoomValue">100 %</span></div><div class="drawing-tip" id="drawingTip">Elige una acción y arrastra. Para curvar, mueve el punto celeste. Balón: toca al jugador que lo tiene.</div><div class="court-space"><div class="board"><svg id="court" xmlns="http://www.w3.org/2000/svg"></svg></div></div><section class="sequence-column" aria-label="Secuencias de la jugada"><h3 class="sequence-title">SECUENCIA</h3><div id="steps" class="strip"></div></section><textarea id="notes" class="notes" placeholder="Notas de este paso…"></textarea></main><aside hidden><h3 class="properties-title">PROPIEDADES</h3><div class="props"><label>Color:<span class="palette"><input type="color" id="color" value="#0066ff"><button class="swatch" style="background:#0050d7" onclick="chooseColor('#0050d7')"></button><button class="swatch" style="background:#71aff5" onclick="chooseColor('#71aff5')"></button><button class="swatch" style="background:#b5d9fc" onclick="chooseColor('#b5d9fc')"></button><button class="swatch" style="background:#fff" onclick="chooseColor('#ffffff')"></button></span></label><label>Tamaño:<input id="size" type="range" min="12" max="32" value="26"></label><label>Número:<input id="number" value="1" aria-label="Número o texto"></label><div><label>Grosor de línea:<input hidden id="width" type="range" min="2" max="8" value="4"></label><div class="width-buttons"><button onclick="chooseWidth(2)">―</button><button onclick="chooseWidth(4)">━</button><button onclick="chooseWidth(7)">▬</button></div></div></div><div class="element-more"><button onclick="applyTeam('player')">Color ataque</button><button onclick="applyTeam('defender')">Color defensa</button><button onclick="duplicateElement()">Duplicar ficha</button><button onclick="straightenLine()" title="Selecciona una línea y arrastra el círculo central para curvarla">Enderezar línea</button><button onclick="duplicateStep()">Duplicar paso</button><button onclick="renameStep()">Renombrar paso</button><button onclick="deleteStep()">Eliminar paso</button></div><span id="hint" hidden></span></aside></div><footer class="bottom"><strong id="stepStatus"></strong><span><kbd>← →</kbd>Cambiar paso</span><span title="Ctrl + C copia el paso actual; Ctrl + V agrega la copia"><kbd>Ctrl + C / V</kbd>Copiar / Pegar paso</span><span><kbd>Supr</kbd>Borrar selección</span><span><kbd>Ctrl + Z</kbd>Deshacer</span><span><kbd>Ctrl + Y</kbd>Rehacer</span><span><kbd>Ctrl + E</kbd>Exportar</span></footer><div id="export" class="export-pop" hidden><button class="close-pop" onclick="$('export').hidden=true">×</button><h2>♧ Exportar selección</h2><small style="font-size:12px">Carpetas y jugadas seleccionadas</small><p id="exportInfo"></p><p>Exporta hasta cuatro secuencias por hoja A4.</p><hr><label><input type="checkbox" checked disabled>Incluir todos los pasos</label><select id="perpage"><option value="4" selected>Hasta 4 secuencias por hoja A4</option><option value="2">2 secuencias por hoja A4</option><option value="1">1 secuencia por hoja A4</option></select><label for="print-orientation">Orientación</label><select id="print-orientation"><option value="portrait" selected>Vertical</option><option value="landscape">Horizontal</option></select><button class="primary" onclick="printPDF()">⇧ Generar PDF</button></div></div><script>
+</style><script src="./court-svg.js"></script><body><dialog id="share-play" aria-labelledby="share-play-title"><h2 id="share-play-title">Compartir jugada</h2><p id="share-status" role="status"></p><input id="shared-link" aria-label="Enlace de solo lectura" readonly hidden><form method="dialog"><footer><button type="submit">Cerrar</button><button type="button" onclick="openSharedPdf()">Exportar PDF</button><button id="copy-shared-link" type="button" onclick="copySharedPlayLink()">Copiar enlace</button></footer></form></dialog><div id="app-frame"><header class="top"><div class="brand"><img src="/PLAYCREATE/icon-192-flat.png" width="46" height="46" style="border-radius:10px" alt="Logo Design Play">DESIGN PLAY</div><h1 id="title" class="work-title" aria-label="Jugada o drill actual" aria-live="polite"></h1><span id="save">Guardado</span><button class="head-action undo" onclick="undo()" title="Deshacer">↶</button><button class="head-action redo" onclick="redo()" title="Rehacer">↷</button><button class="head-action theme" onclick="theme()" title="Tema claro u oscuro">☀</button><button class="primary export-button" onclick="exportDialog()">⇧ Exportar PDF</button></header><div class="layout"><aside><h3 class="library-title">BIBLIOTECA</h3><input id="search" placeholder="⌕   Buscar jugadas..." oninput="library()"><button class="new-play create-folder-text" onclick="addFolder()">+ Crear carpeta</button><div class="library" id="library" role="tree" aria-multiselectable="true" aria-label="Carpetas y jugadas"></div><div class="utility"><button onclick="backup()">Respaldo</button><button onclick="$('file').click()">Importar</button></div><span id="count" hidden></span><input hidden id="file" type="file" accept=".json"></aside><main><div class="tools" id="tools" aria-label="Herramientas de dibujo"></div><div class="toolbar"><button id="half" onclick="setCourt(false)">⚿　Media cancha</button><button id="full" onclick="setCourt(true)">⚿　Cancha completa</button><select hidden id="lineShape"><option value="straight">Recta</option></select><span hidden id="zoomValue">100 %</span></div><div class="drawing-tip" id="drawingTip">Elige una acción y arrastra. Para curvar, mueve el punto celeste. Balón: toca al jugador que lo tiene.</div><div class="court-space"><div class="board"><svg id="court" xmlns="http://www.w3.org/2000/svg"></svg></div></div><section class="sequence-column" aria-label="Secuencias de la jugada"><h3 class="sequence-title">SECUENCIA</h3><div id="steps" class="strip"></div></section><textarea id="notes" class="notes" placeholder="Notas de este paso…"></textarea></main><aside hidden><h3 class="properties-title">PROPIEDADES</h3><div class="props"><label>Color:<span class="palette"><input type="color" id="color" value="#0066ff"><button class="swatch" style="background:#0050d7" onclick="chooseColor('#0050d7')"></button><button class="swatch" style="background:#71aff5" onclick="chooseColor('#71aff5')"></button><button class="swatch" style="background:#b5d9fc" onclick="chooseColor('#b5d9fc')"></button><button class="swatch" style="background:#fff" onclick="chooseColor('#ffffff')"></button></span></label><label>Tamaño:<input id="size" type="range" min="12" max="32" value="26"></label><label>Número:<input id="number" value="1" aria-label="Número o texto"></label><div><label>Grosor de línea:<input hidden id="width" type="range" min="2" max="8" value="4"></label><div class="width-buttons"><button onclick="chooseWidth(2)">―</button><button onclick="chooseWidth(4)">━</button><button onclick="chooseWidth(7)">▬</button></div></div></div><div class="element-more"><button onclick="applyTeam('player')">Color ataque</button><button onclick="applyTeam('defender')">Color defensa</button><button onclick="duplicateElement()">Duplicar ficha</button><button onclick="straightenLine()" title="Selecciona una línea y arrastra el círculo central para curvarla">Enderezar línea</button><button onclick="duplicateStep()">Duplicar paso</button><button onclick="renameStep()">Renombrar paso</button><button onclick="deleteStep()">Eliminar paso</button></div><span id="hint" hidden></span></aside></div><footer class="bottom"><strong id="stepStatus"></strong><span><kbd>← →</kbd>Cambiar paso</span><span title="Ctrl + C copia el paso actual; Ctrl + V agrega la copia"><kbd>Ctrl + C / V</kbd>Copiar / Pegar paso</span><span><kbd>Supr</kbd>Borrar selección</span><span><kbd>Ctrl + Z</kbd>Deshacer</span><span><kbd>Ctrl + Y</kbd>Rehacer</span><span><kbd>Ctrl + E</kbd>Exportar</span></footer><div id="export" class="export-pop" hidden><button class="close-pop" onclick="$('export').close()">×</button><h2>♧ Exportar selección</h2><small style="font-size:12px">Carpetas y jugadas seleccionadas</small><p id="exportInfo"></p><p>El PDF conserva la distribución de canchas del editor en hojas A4.</p><hr><label><input type="checkbox" checked disabled>Incluir todos los pasos</label><label for="print-orientation">Orientación</label><select id="print-orientation"><option value="portrait" selected>Vertical</option><option value="landscape">Horizontal</option></select><button class="primary" onclick="printPDF()">⇧ Generar PDF</button></div></div><script>
 function closeDrawers(){document.querySelector('.layout').classList.remove('library-open','tools-open')}function toggleDrawer(name){let el=document.querySelector('.layout'),open=el.classList.contains(name+'-open');closeDrawers();if(!open)el.classList.add(name+'-open')}
 const $=id=>document.getElementById(id), uid=()=>crypto.randomUUID(), clone=x=>JSON.parse(JSON.stringify(x)), esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const seedPlayers=[{type:'player',x:300,y:435,n:'1'},{type:'player',x:480,y:350,n:'2'},{type:'player',x:500,y:180,n:'3'},{type:'player',x:100,y:180,n:'4'},{type:'player',x:330,y:300,n:'5'}].map(e=>({...e,id:uid(),color:'#1971ff',size:20,width:3}));
@@ -649,7 +649,7 @@ function exportDialog(){$('exportInfo').textContent=selected.size?selected.size+
   }))
  };
 }
-async function openLibraryShare(type,id){
+function openLibraryShare(type,id){
  if(activeCourtText)finishCourtText(false);
  const folder=type==='folder'?state.folders.find(f=>f.id===id):null;
  const folderSet=folder?folderIds(folder.id):null;
@@ -658,21 +658,18 @@ async function openLibraryShare(type,id){
   alert(type==='folder'?'La carpeta no tiene jugadas con canchas para compartir.':'Agrega al menos una cancha para compartir la jugada.');
   return;
  }
- const dialog=$('share-play'),link=$('shared-link'),status=$('share-status'),copy=$('copy-shared-link');
+ const dialog=$('share-play'),link=$('shared-link');
+ dialog.shareSelection={folder,plays};
  $('share-play-title').textContent=folder?'Compartir carpeta':'Compartir jugada';
- link.value='';copy.disabled=true;status.textContent='Preparando enlace…';
- const request=Symbol();
- dialog.shareRequest=request;
+ $('share-status').textContent=folder?folder.name:plays[0].name;
+ link.value='';link.hidden=true;$('copy-shared-link').disabled=false;
  dialog.showModal();
- try{
-  const snapshot=folder?{name:String(folder.name||'Carpeta'),plays:plays.map(snapshotSharedPlay)}:snapshotSharedPlay(plays[0]);
-  const url=await createSharedPlayLink(snapshot);
-  if(dialog.shareRequest!==request)return;
-  link.value=url;copy.disabled=false;
-  status.textContent=folder?'El enlace abre las jugadas de la carpeta en modo lectura.':'El enlace abre una copia de la jugada en modo lectura.';
- }catch(error){
-  if(dialog.shareRequest===request)status.textContent=error.message;
- }
+}
+function openSharedPdf(){
+ const dialog=$('share-play'),selection=dialog.shareSelection;
+ if(!selection)return;
+ dialog.close();
+ exportDialog(selection);
 }
 async function createSharedPlayLink(snapshot){
  const payload=new Blob([JSON.stringify(snapshot)]);
@@ -702,27 +699,46 @@ async function createSharedPlayLink(snapshot){
  return origin+'/'+result.code;
 }
 async function copySharedPlayLink(){
- const link=$('shared-link'),status=$('share-status');
+ const dialog=$('share-play'),selection=dialog.shareSelection;
+ if(!selection)return;
+ const link=$('shared-link'),status=$('share-status'),copy=$('copy-shared-link');
+ const stillOpen=()=>dialog.open&&dialog.shareSelection===selection;
+ if(!link.value){
+  copy.disabled=true;status.textContent='Preparando enlace…';
+  try{
+   if(activeCourtText)finishCourtText(false);
+   const {folder,plays}=selection;
+   const snapshot=folder?{name:String(folder.name||'Carpeta'),plays:plays.map(snapshotSharedPlay)}:snapshotSharedPlay(plays[0]);
+   const url=await createSharedPlayLink(snapshot);
+   if(!stillOpen())return;
+   link.value=url;link.hidden=false;
+  }catch(error){
+   if(stillOpen())status.textContent=error.message;
+   return;
+  }finally{
+   if(stillOpen())copy.disabled=false;
+  }
+ }
  try{
   await navigator.clipboard.writeText(link.value);
-  status.textContent='Enlace copiado.';
+  if(stillOpen())status.textContent='Enlace copiado.';
  }catch(error){
+  if(!stillOpen())return;
   link.focus();link.select();
   status.textContent='Enlace seleccionado. Cópialo con Ctrl + C o con el menú del navegador.';
  }
 }
-function buildPrintDocument(plays,per=4,orientation="portrait"){
- per=[1,2,4].includes(per)?per:4;
+function buildPrintDocument(plays,orientation="portrait"){
  const landscape=orientation==="landscape";
  const topMargin=7, sideMargin=4, bottomMargin=4;
  const paperWidth=(landscape?297:210)-2*sideMargin;
  const paperHeight=(landscape?210:297)-topMargin-bottomMargin;
  const pages=plays.flatMap(p=>{
   const folder=state.folders.find(f=>f.id===p.folder),chunks=[];
-  for(let offset=0;offset<p.steps.length;offset+=per){
-   const t=projection(p.full),steps=p.steps.slice(offset,offset+per);
-   const columns=steps.length>1&&(steps.length>2||landscape||p.full)?2:1;
-   const rows=Math.ceil(steps.length/columns);
+  const pageSize=p.full?1:COURTS_PER_SHEET,t=projection(p.full);
+  for(let offset=0;offset<p.steps.length;offset+=pageSize){
+   const steps=p.steps.slice(offset,offset+pageSize);
+   const {columns,rows}=courtSheetDimensions(steps.length);
    const notesHeight=steps.some(st=>st.notes?.trim())?'13mm':'0mm';
    const cells=steps.map(st=>'<section class="print-sequence"><svg viewBox="0 0 '+t.w+' '+t.h+'" preserveAspectRatio="xMidYMid meet">'+sceneSVG(st,p.full)+'</svg>'+(st.notes?.trim()?'<p>'+esc(st.notes)+'</p>':'')+'</section>').join('');
    chunks.push('<article class="print-page"><header>'+esc(folder?.name||'')+' · '+esc(p.name)+'</header><div class="print-grid" style="--columns:'+columns+';--rows:'+rows+';--court-ratio:'+t.w/t.h+';--notes-height:'+notesHeight+'">'+cells+'</div></article>');
@@ -733,11 +749,18 @@ function buildPrintDocument(plays,per=4,orientation="portrait"){
 }
 function printPDF(){
  if(activeCourtText)finishCourtText(false);
- syncExportSelection();if(!state.plays.length)return alert('No hay jugadas para exportar.');
- if(libraryPicked.size&&!selected.size)return alert('Las carpetas seleccionadas no contienen jugadas.');
- const plays=selected.size?state.plays.filter(p=>selected.has(p.id)):[play()];if(!plays.some(p=>p.steps.length))return alert('Agrega una cancha para exportar.');const win=window.open('','_blank');
+ const scope=$('export').shareSelection;
+ let plays=scope?.plays;
+ if(!plays){
+  syncExportSelection();
+  if(!state.plays.length)return alert('No hay jugadas para exportar.');
+  if(libraryPicked.size&&!selected.size)return alert('Las carpetas seleccionadas no contienen jugadas.');
+  plays=selected.size?state.plays.filter(p=>selected.has(p.id)):[play()];
+ }
+ if(!plays.some(p=>p.steps.length))return alert('Agrega una cancha para exportar.');
+ const win=window.open('','_blank');
  if(!win)return alert('Permite abrir la ventana de impresión en tu navegador.');
- win.document.write(buildPrintDocument(plays,+$('perpage').value,$('print-orientation').value));win.document.close();$('export').close();setTimeout(()=>win.print(),350);
+ win.document.write(buildPrintDocument(plays,$('print-orientation').value));win.document.close();$('export').close();setTimeout(()=>win.print(),350);
 }
 
 document.onkeydown=ev=>{
@@ -917,8 +940,22 @@ function library(){
 }
 
 function render(options={}){document.body.classList.toggle('light',state.theme==='light');$('title').textContent=play().name;$('title').title=play().name;$('notes').value=step().notes;$('notes').disabled=!step().id;$('half').classList.toggle('active',!play().full);$('full').classList.toggle('active',play().full);$('stepStatus').textContent=play().id&&play().steps.length?'Paso '+(play().steps.findIndex(s=>s.id===sid)+1)+' de '+play().steps.length:'Sin secuencias';if(options.keepLibrary)syncExportSelection();else library();board();let t=projection(play().full);$('steps').innerHTML=play().steps.map((s,i)=>'<button class="thumb '+(sid===s.id?'active':'')+'" data-step="'+s.id+'"><svg viewBox="0 0 '+t.w+' '+t.h+'">'+sceneSVG(s,play().full)+'</svg><span data-rename-step="'+esc(s.id)+'">'+(i+1)+'. '+esc(s.name)+'</span></button>').join('')+'<button onclick="newStep()" '+(!play().id?'disabled':'')+' title="Agregar una secuencia copiando la actual">+ Agregar secuencia</button>';save();renderAnnotationOptions()}
-function exportDialog(){syncExportSelection();$('exportInfo').textContent=libraryPicked.size?(selected.size?selected.size+' jugadas seleccionadas.':'Las carpetas seleccionadas están vacías.'):'Se exportará la jugada actual.';$('export').hidden=!$('export').hidden}
-$('export').close=()=>{$('export').hidden=true};
+function exportDialog(shareSelection=null){
+ const panel=$('export');
+ if(!shareSelection&&!panel.hidden&&!panel.shareSelection){panel.close();return;}
+ panel.shareSelection=shareSelection;
+ if(shareSelection){
+  const {folder,plays}=shareSelection;
+  $('exportInfo').textContent=folder?folder.name+' · '+plays.length+(plays.length===1?' jugada':' jugadas'):plays[0].name;
+ }else{
+  syncExportSelection();
+  $('exportInfo').textContent=libraryPicked.size?(selected.size?selected.size+' jugadas seleccionadas.':'Las carpetas seleccionadas están vacías.'):'Se exportará la jugada actual.';
+ }
+ panel.hidden=false;
+}
+$('export').close=()=>{
+ const panel=$('export');panel.hidden=true;panel.shareSelection=null;
+};
 $('library').addEventListener('click',ev=>{let id=ev.target.closest('[data-collapse]')?.dataset.collapse;if(id){libraryFolder=id;collapsedFolders.has(id)?collapsedFolders.delete(id):collapsedFolders.add(id);library()}});
 document.addEventListener('keydown',ev=>{if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName))return;if(ev.ctrlKey&&ev.key.toLowerCase()==='e'){ev.preventDefault();exportDialog()}if(ev.ctrlKey&&ev.key.toLowerCase()==='d'){ev.preventDefault();duplicateStep()}if(ev.key==='ArrowLeft'||ev.key==='ArrowRight'){let i=play().steps.findIndex(s=>s.id===sid),s=play().steps[i+(ev.key==='ArrowRight'?1:-1)];if(s){sid=s.id;focus=null;render()}}});
 
@@ -1001,10 +1038,16 @@ function editorBoard(){
  court.innerHTML=html;centerWorkTitle();
 }
 
+const COURTS_PER_SHEET=4;
 var courtSheetKey='';
+function courtSheetDimensions(count){
+ const columns=count>1?2:1;
+ return {columns,rows:Math.max(1,Math.ceil(count/columns))};
+}
 function courtSheetPage(p=play()){
- const index=Math.max(0,p.steps.findIndex(st=>st.id===sid)),start=Math.floor(index/4)*4;
- return {start,index:Math.floor(index/4),count:Math.ceil(p.steps.length/4),steps:p.steps.slice(start,start+4)};
+ const index=Math.floor(Math.max(0,p.steps.findIndex(st=>st.id===sid))/COURTS_PER_SHEET);
+ const start=index*COURTS_PER_SHEET;
+ return {start,index,count:Math.ceil(p.steps.length/COURTS_PER_SHEET),steps:p.steps.slice(start,start+COURTS_PER_SHEET)};
 }
 function selectSheetCourt(id){
  if(!play().steps.some(st=>st.id===id))return;
@@ -1016,29 +1059,29 @@ function selectSheetCourt(id){
 function addCourtSequence(){
  const p=play();if(!p.id||(p.full&&p.steps.length))return;
  if(activeCourtText)finishCourtText(false);
- const page=courtSheetPage(p);if(page.steps.length>=4)return;
+ const page=courtSheetPage(p);if(page.steps.length>=COURTS_PER_SHEET)return;
  const copy=clone(step()),ids=new Map(copy.elements.map(e=>[e.id,uid()]));
  copy.id=uid();copy.name='Secuencia '+(p.steps.length+1);
  copy.elements.forEach(e=>{e.id=ids.get(e.id);if(e.holder){if(ids.has(e.holder))e.holder=ids.get(e.holder);else delete e.holder}});
  checkpoint();p.steps.splice(page.start+page.steps.length,0,copy);sid=copy.id;focus=null;editorSelection.clear();lineDraft=null;drag=null;setTool('select');render({keepLibrary:true});document.querySelector('.court-panel.active')?.scrollIntoView({block:'nearest'});
 }
 function changeCourtSheetPage(delta){
- const p=play(),page=courtSheetPage(p),target=p.steps[(page.index+delta)*4];if(target)selectSheetCourt(target.id);
+ const p=play(),page=courtSheetPage(p),target=p.steps[(page.index+delta)*COURTS_PER_SHEET];if(target)selectSheetCourt(target.id);
 }
 function renderCourtSheet(){
  const court=$('court'),root=document.querySelector('.court-space .board');
  if(!root||!court)return;
  const p=play(),page=courtSheetPage(p),multi=!!p.id&&!p.full&&p.steps.length>1;
  root.classList.toggle('court-sheet',multi);
- const columns=page.steps.length>1?2:1;
+ const {columns,rows}=courtSheetDimensions(page.steps.length);
  root.style.setProperty('--court-columns',String(columns));
- root.style.setProperty('--court-rows',String(Math.max(1,Math.ceil(page.steps.length/columns))));root.style.setProperty('--court-navigation',multi&&page.count>1?'28px':'0px');root.classList.toggle('has-sheet-navigation',multi&&page.count>1);
+ root.style.setProperty('--court-rows',String(rows));root.style.setProperty('--court-navigation',multi&&page.count>1?'28px':'0px');root.classList.toggle('has-sheet-navigation',multi&&page.count>1);
  const visible=multi?page.steps:(p.id&&step().id?[step()]:[]),key=JSON.stringify([p.id,p.full,multi,page.start,sid,visible.map(st=>[st.id,st.name]),p.steps.length]);
  if(key!==courtSheetKey){
   courtSheetKey=key;
   const t=projection(p.full);
   court.style.display=visible.length?'':'none';
-  root.innerHTML=(!visible.length&&p.id?'<div class="court-empty"><button type="button" data-add-court class="restore-court-sequence" aria-label="Agregar cancha">+ Agregar cancha</button></div>':'')+(multi&&page.count>1?'<div class="court-sheet-heading"><span>Hoja '+(page.index+1)+' / '+page.count+'</span>'+(page.count>1?'<button type="button" data-sheet-page="-1" '+(page.index===0?'disabled':'')+' aria-label="Hoja anterior">Anterior</button><button type="button" data-sheet-page="1" '+(page.index+1===page.count?'disabled':'')+' aria-label="Hoja siguiente">Siguiente</button>':'')+'</div>':'')+visible.map((st,i)=>'<section class="court-panel '+(st.id===sid?'active':'')+'" data-court-step="'+esc(st.id)+'" tabindex="0" role="group" aria-label="Cancha '+(page.start+i+1)+'"><button type="button" class="remove-court-sequence" data-remove-court="'+esc(st.id)+'" title="Eliminar cancha" aria-label="Eliminar cancha '+(page.start+i+1)+'">×</button><div class="court-panel-drawing">'+(st.id===sid?'':'<svg data-sheet-preview="'+esc(st.id)+'" viewBox="0 0 '+t.w+' '+t.h+'" preserveAspectRatio="xMidYMid meet">'+sceneSVG(st,p.full)+'</svg>')+(!p.full&&i===visible.length-1&&page.steps.length<4?'<button type="button" class="add-court-sequence" data-add-court title="Agregar media cancha como siguiente secuencia" aria-label="Agregar media cancha como siguiente secuencia">+</button>':'')+'</div></section>').join('');
+  root.innerHTML=(!visible.length&&p.id?'<div class="court-empty"><button type="button" data-add-court class="restore-court-sequence" aria-label="Agregar cancha">+ Agregar cancha</button></div>':'')+(multi&&page.count>1?'<div class="court-sheet-heading"><span>Hoja '+(page.index+1)+' / '+page.count+'</span>'+(page.count>1?'<button type="button" data-sheet-page="-1" '+(page.index===0?'disabled':'')+' aria-label="Hoja anterior">Anterior</button><button type="button" data-sheet-page="1" '+(page.index+1===page.count?'disabled':'')+' aria-label="Hoja siguiente">Siguiente</button>':'')+'</div>':'')+visible.map((st,i)=>'<section class="court-panel '+(st.id===sid?'active':'')+'" data-court-step="'+esc(st.id)+'" tabindex="0" role="group" aria-label="Cancha '+(page.start+i+1)+'"><button type="button" class="remove-court-sequence" data-remove-court="'+esc(st.id)+'" title="Eliminar cancha" aria-label="Eliminar cancha '+(page.start+i+1)+'">×</button><div class="court-panel-drawing">'+(st.id===sid?'':'<svg data-sheet-preview="'+esc(st.id)+'" viewBox="0 0 '+t.w+' '+t.h+'" preserveAspectRatio="xMidYMid meet">'+sceneSVG(st,p.full)+'</svg>')+(!p.full&&i===visible.length-1&&page.steps.length<COURTS_PER_SHEET?'<button type="button" class="add-court-sequence" data-add-court title="Agregar media cancha como siguiente secuencia" aria-label="Agregar media cancha como siguiente secuencia">+</button>':'')+'</div></section>').join('');
   const active=[...root.querySelectorAll('[data-court-step]')].find(el=>el.dataset.courtStep===sid);
   if(active)active.querySelector('.court-panel-drawing').prepend(court);else root.append(court);
   root.onpointerdown=ev=>{
