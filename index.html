@@ -488,11 +488,12 @@ body:not(.light) .board.court-sheet{background:transparent}
 .sequence-stage:fullscreen{width:100%;height:100%;margin:0;padding:12px;background:#f4f7fa;color:#0c1d32;overflow:auto}
 .toolbar #editor-playback{flex:0 0 40px;padding:4px 0;color:#fff;background:#00729e;border-color:#00658c}
 .toolbar #editor-playback:disabled{opacity:.45;cursor:default}
-.court-space{--court-title-height:30px;--court-note-height:52px;--court-chrome:calc(var(--court-title-height) + var(--court-note-height))}
-.court-panel .court-note-box{width:100%;flex:0 0 var(--court-note-height);min-height:0;background:#fff;border:1px solid #aebeca}
-.court-panel .court-note-box button,.court-panel .court-note-box textarea{display:block;box-sizing:border-box;width:100%;height:100%;margin:0;padding:5px 8px;border:0;border-radius:0;resize:none;overflow:auto;background:#fff;color:#0c1d32;text-align:left;font:14px/1.35 'Segoe UI',Arial,sans-serif;white-space:pre-wrap;overflow-wrap:anywhere}
+.court-space{--court-title-height:30px;--court-note-height:36px;--court-chrome:calc(var(--court-title-height) + var(--court-note-height))}
+.court-panel .court-note-box{position:relative;top:-8px;width:100%;flex:0 0 var(--court-note-height);min-height:0}
+.court-panel .court-note-box button,.court-panel .court-note-box textarea{display:block;box-sizing:border-box;width:100%;height:100%;margin:0;padding:0;border:0;border-radius:0;resize:none;overflow:auto;background:transparent;color:var(--text);text-align:left;font:14px/1.25 'Segoe UI',Arial,sans-serif;white-space:pre-wrap;overflow-wrap:anywhere}
 .court-panel .court-note-box button[hidden],.court-panel .court-note-box textarea[hidden]{display:none}
-.court-panel .court-note-box [data-empty="true"]{color:#536579}
+.court-panel .court-note-box button{display:flex;align-items:flex-start}
+.court-panel .court-note-box [data-empty="true"],.court-panel .court-note-box textarea::placeholder{color:var(--muted);opacity:1}
 .court-panel .court-note-box button:focus-visible,.court-panel .court-note-box textarea:focus{outline:2px solid #007AAD;outline-offset:-2px}
 .court-panel .court-title-box{width:100%;flex:0 0 var(--court-title-height);min-height:0;padding:0 34px;display:flex;align-items:stretch;background:#fff;border:1px solid #aebeca}
 .court-panel .court-title-box input{width:100%;min-width:0;padding:2px 5px;border:0;border-radius:0;background:#fff;color:#0c1d32;text-align:center;font:650 16px 'Segoe UI',Arial,sans-serif;text-overflow:ellipsis}
@@ -1403,7 +1404,7 @@ function changeCourtSheetPage(delta){
 }
 function courtNoteMarkup(st,number){
  const notes=String(st.notes||''),empty=!notes.trim();
- return '<div class="court-note-box"><button type="button" data-edit-court-note data-empty="'+empty+'" aria-label="Editar nota de la cancha '+number+'">'+esc(empty?'Agregar nota…':notes)+'</button><textarea data-court-note-editor="'+esc(st.id)+'" aria-label="Nota de la cancha '+number+'" aria-description="Enter para guardar. Shift más Enter para un salto de renglón." placeholder="Escribe la nota…" hidden>'+esc(notes)+'</textarea></div>';
+ return '<div class="court-note-box"><button type="button" data-edit-court-note data-empty="'+empty+'" aria-label="Editar nota de la cancha '+number+'">'+esc(empty?'Escribir nota…':notes)+'</button><textarea data-court-note-editor="'+esc(st.id)+'" aria-label="Nota de la cancha '+number+'" aria-description="Enter para guardar. Shift más Enter para un salto de renglón." placeholder="Escribe la nota…" hidden>'+esc(notes)+'</textarea></div>';
 }
 function finishCourtNote(input,options={}){
  if(input.hidden)return;
@@ -1414,7 +1415,7 @@ function finishCourtNote(input,options={}){
    checkpoint();target.notes=input.value;save();
   }
   const value=String(target.notes||''),empty=!value.trim();
-  view.textContent=empty?'Agregar nota…':value;
+  view.textContent=empty?'Escribir nota…':value;
   view.dataset.empty=String(empty);
   input.value=value;
  }
