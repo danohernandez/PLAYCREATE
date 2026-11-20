@@ -1064,15 +1064,22 @@ function buildPrintDocument(plays,orientation="portrait"){
   const pageSize=p.full?1:COURTS_PER_SHEET,t=printCourtViewport(p.steps,p.full);
   for(let offset=0;offset<p.steps.length;offset+=pageSize){
    const steps=p.steps.slice(offset,offset+pageSize);
-   const {columns,rows}=courtSheetDimensions(steps.length);
+   const {columns,rows:editorRows}=courtSheetDimensions(steps.length);
+   const rows=columns===2?2:1;
    const notesHeight=steps.some(st=>st.notes?.trim())?'12mm':'0mm';
-   const fillPage=!landscape&&!p.full&&rows>1;
-   const centeringClass=steps.length===3?' three-courts':'';
+   const fillPage=!landscape&&rows>1;
    const notesClass=notesHeight==='0mm'?'':' has-notes';
-   const noteReference=notesClass?printNoteReference(p,offset,columns,rows):null;
-   const cells=steps.map(st=>'<section class="print-sequence"><div class="print-diagram"><div class="print-court-title">'+esc(courtTitle(p,st))+'</div><div class="print-court"><svg viewBox="'+[t.left,t.top,t.width,t.height].join(' ')+'" preserveAspectRatio="xMidYMid meet">'+sceneSVG(st,p.full)+'</svg></div></div>'+(noteReference?printNoteMarkup(String(st.notes||''),noteReference):'')+'</section>').join('');
+   const noteReference=notesClass?printNoteReference(p,offset,columns,editorRows):null;
+   const viewBox=[t.left,t.top,t.width,t.height].join(' ');
+   const slots=Array.from({length:columns*rows},(_,index)=>steps[index]);
+   const cells=slots.map(st=>{
+    const title=st?esc(courtTitle(p,st)):'';
+    const drawing=st?sceneSVG(st,p.full):'';
+    const notes=noteReference?(st?printNoteMarkup(String(st.notes||''),noteReference):'<p></p>'):'';
+    return '<section class="print-sequence'+(st?'':' print-empty-court')+'"><div class="print-diagram"><div class="print-court-title">'+title+'</div><div class="print-court"><svg viewBox="'+viewBox+'" preserveAspectRatio="xMidYMid meet">'+drawing+'</svg></div></div>'+notes+'</section>';
+   }).join('');
    const title=[folder?.name,p.name].filter(Boolean).join(' · ');
-   chunks.push('<article class="print-page"><header>'+teamHeading+'<div class="print-play-title">'+esc(title)+'</div></header><div class="print-grid'+notesClass+(fillPage?' fill-page':'')+centeringClass+'" style="--columns:'+columns+';--rows:'+rows+';--court-ratio:'+t.width/t.height+';--notes-height:'+notesHeight+'">'+cells+'</div></article>');
+   chunks.push('<article class="print-page"><header>'+teamHeading+'<div class="print-play-title">'+esc(title)+'</div></header><div class="print-grid'+notesClass+(fillPage?' fill-page':'')+'" style="--columns:'+columns+';--rows:'+rows+';--court-ratio:'+t.width/t.height+';--notes-height:'+notesHeight+'">'+cells+'</div></article>');
   }
   return chunks;
  });
@@ -1089,9 +1096,7 @@ body{font:12px Arial,sans-serif;color:#0c1d32;margin:0;background:#fff}
 .print-team span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .print-grid{--gap:1mm;--court-title-height:11mm;--grid-height:calc(var(--page-height) - var(--preview-inset) - var(--header-height));--row-height:calc((var(--grid-height) - (var(--rows) - 1)*var(--gap))/var(--rows));--court-height:calc(var(--row-height) - var(--notes-height) - var(--court-title-height));--column-width:calc((100% - (var(--columns) - 1)*var(--gap))/var(--columns));--cell-width:min(var(--column-width),calc(var(--court-height)*var(--court-ratio)));display:grid;grid-template-columns:repeat(var(--columns),minmax(0,var(--cell-width)));justify-content:center;gap:var(--gap);margin-block:auto}
 .print-grid.fill-page{--row-gap:0.6mm;--row-height:min(123mm,calc((var(--grid-height) - (var(--rows) - 1)*var(--row-gap))/var(--rows)));row-gap:var(--row-gap)}
-.print-grid.three-courts{grid-template-columns:repeat(4,minmax(0,calc((var(--cell-width) - var(--gap))/2)))}
-.print-grid.three-courts>.print-sequence{grid-column:span 2}
-.print-grid.three-courts>.print-sequence:last-child{grid-column:2 / span 2}
+.print-empty-court{visibility:hidden}
 .print-sequence{min-width:0;min-height:0;display:flex;flex-direction:column;overflow:hidden;break-inside:avoid}
 .print-diagram{min-height:0;flex:1 1 auto;display:flex;flex-direction:column;justify-content:flex-end}
 .print-court-title{height:var(--court-title-height);flex:none;align-content:end;padding:0 2mm 1.9mm;line-height:1.1;text-align:center;font-size:22px;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
