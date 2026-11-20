@@ -1049,8 +1049,8 @@ function printNoteMarkup(text,reference){
  if(!text.trim())return '<p></p>';
  const lines=printNoteLines(text.replace(/\r\n?/g,'\n'),reference);
  const height=Math.max(3,lines.length)*reference.lineHeight;
- const spans=lines.map((line,index)=>'<text x="0" y="'+(reference.size+(index*reference.lineHeight))+'">'+esc(line)+'</text>').join('');
- return '<p><svg aria-label="Nota de la secuencia" viewBox="0 0 '+reference.width+' '+height+'" preserveAspectRatio="xMinYMin meet" xml:space="preserve" font-family="'+esc(reference.family)+'" font-size="'+reference.size+'" fill="#0c1d32">'+spans+'</svg></p>';
+ const spans=lines.map((line,index)=>'<text x="'+reference.width/2+'" y="'+(reference.size+(index*reference.lineHeight))+'">'+esc(line)+'</text>').join('');
+ return '<p><svg aria-label="Nota de la secuencia" viewBox="0 0 '+reference.width+' '+height+'" preserveAspectRatio="xMidYMin meet" text-anchor="middle" xml:space="preserve" font-family="'+esc(reference.family)+'" font-size="'+reference.size+'" fill="#0c1d32">'+spans+'</svg></p>';
 }
 function buildPrintDocument(plays,orientation="portrait"){
  const landscape=orientation==="landscape",team=printTeamSettings();
