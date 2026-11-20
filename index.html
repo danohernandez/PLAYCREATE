@@ -1140,10 +1140,10 @@ function workspaceZoomGeometry(zoom,pan,point,center,frameScale,factor){
  return {zoom:next,pan:{x:pan.x+(1-ratio)*(point.x-center.x)/frameScale,y:pan.y+(1-ratio)*(point.y-center.y)/frameScale}};
 }
 function workspacePanLimits(root,space,zoom){
- return {
-  x:Math.max(0,(root.offsetWidth*zoom-space.clientWidth)/2,root.offsetWidth*(zoom-1)/2),
-  y:Math.max(0,(root.offsetHeight*zoom-space.clientHeight)/2,root.offsetHeight*(zoom-1)/2)
- };
+ const x=Math.max(0,(root.offsetWidth*zoom-space.clientWidth)/2,root.offsetWidth*(zoom-1)/2);
+ const y=Math.max(0,(root.offsetHeight*zoom-space.clientHeight)/2,root.offsetHeight*(zoom-1)/2);
+ const extraDown=(y-(-y))*.1;
+ return {x:{min:-x,max:x},y:{min:-y-extraDown,max:y}};
 }
 function updateWorkspaceScrollbars(space,limits,visible){
  for(const axis of ['x','y']){
@@ -1162,15 +1162,15 @@ function updateWorkspaceScrollbars(space,limits,visible){
    bar.addEventListener('keydown',event=>event.stopPropagation());
    bar.addEventListener('scroll',()=>{
     if(bar.hidden||bar[position]===Number(bar.dataset.position))return;
-    const range=bar[extent]-bar[viewport],limit=Number(bar.dataset.limit);
-    if(range>0){workspacePan[axis]=limit*(1-2*bar[position]/range);updateWorkspaceZoom();}
+    const range=bar[extent]-bar[viewport],min=Number(bar.dataset.min),max=Number(bar.dataset.max);
+    if(range>0){workspacePan[axis]=max-(max-min)*bar[position]/range;updateWorkspaceZoom();}
    });
   }
   bar.hidden=false;
-  const limit=limits[axis],range=Math.max(1,Math.ceil(2*limit));
-  bar.dataset.limit=String(limit);
+  const {min,max}=limits[axis],span=max-min,range=Math.max(1,Math.ceil(span));
+  bar.dataset.min=String(min);bar.dataset.max=String(max);
   bar.firstElementChild.style[horizontal?'width':'height']=(bar[viewport]+range)+'px';
-  const target=limit?Math.round((limit-workspacePan[axis])/(2*limit)*range):0;
+  const target=span?Math.round((max-workspacePan[axis])/span*range):0;
   bar.dataset.position=String(target);
   if(bar[position]!==target)bar[position]=target;
  }
@@ -1182,8 +1182,8 @@ function updateWorkspaceZoom(){
  const visible=workspaceZoom>1&&play().steps.length>0;
  const limits=workspacePanLimits(root,space,workspaceZoom);
  if(visible){
-  workspacePan.x=Math.max(-limits.x,Math.min(limits.x,workspacePan.x));
-  workspacePan.y=Math.max(-limits.y,Math.min(limits.y,workspacePan.y));
+  workspacePan.x=Math.max(limits.x.min,Math.min(limits.x.max,workspacePan.x));
+  workspacePan.y=Math.max(limits.y.min,Math.min(limits.y.max,workspacePan.y));
  }
  updateWorkspaceScrollbars(space,limits,visible);
  root.style.transform='translate('+workspacePan.x+'px,'+workspacePan.y+'px) scale('+workspaceZoom+')';root.style.transformOrigin='center center';
