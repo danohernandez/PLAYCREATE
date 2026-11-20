@@ -1314,13 +1314,13 @@ function libraryTaggedPlayIcon(p){
  for(const label of playTags(p)){
   const tag=tagKey(label);
   let code,style;
-  if(/\bsaques?\b/.test(tag)||tag==='sl'||tag==='sf'){
-   code=/\bfondo\b/.test(tag)||tag==='sf'?'Sf':'Sl';
+  if(/\bsaques?\b/.test(tag)||['sl','sf','sb'].includes(tag)){
+   code=/\b(?:fondo|base)\b/.test(tag)||tag==='sf'||tag==='sb'?'SB':'SL';
    style='inbound';
-  }else if(/\bofensiv[ao]s?\b/.test(tag)){
-   code='Of';style='offense';
-  }else if(/\b(?:defensas?|defensiv[ao]s?)\b/.test(tag)){
-   code='Df';style='defense';
+  }else if(tag==='of'||/\bofensiv[ao]s?\b/.test(tag)){
+   code='OF';style='offense';
+  }else if(tag==='df'||/\b(?:defensas?|defensiv[ao]s?)\b/.test(tag)){
+   code='DF';style='defense';
   }else continue;
   return '<span class="play-tag-icon '+style+'" title="'+esc(label)+'">'+code+'</span>';
  }
