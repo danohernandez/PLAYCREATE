@@ -1010,6 +1010,48 @@ function printCourtViewport(steps,full){
  }
  return {left,top,width:right-left,height:bottom-top};
 }
+function printNoteReference(p,offset,columns,rows){
+ const space=document.querySelector('.court-space'),style=getComputedStyle(space);
+ const sample=space.querySelector('[data-edit-court-note]');
+ const font=sample?getComputedStyle(sample):null;
+ const width=space.clientWidth-parseFloat(style.paddingLeft)-parseFloat(style.paddingRight);
+ const height=space.clientHeight;
+ const current=play().id===p.id&&((p.full?play().steps.indexOf(step()):courtSheetPage(p).start)===offset);
+ const chrome=(parseFloat(style.getPropertyValue('--court-title-height'))||30)+(parseFloat(style.getPropertyValue('--court-note-height'))||64);
+ const multi=!p.full&&p.steps.length>1;
+ const navigation=multi&&p.steps.length>COURTS_PER_SHEET?28:0;
+ const cell=multi?Math.min(width/columns,(height-navigation)/rows-chrome):Math.min(width,height);
+ return {width:Math.max(60,current&&sample?.clientWidth?sample.clientWidth:cell||300),font:font?.font||"14px/1.25 'Segoe UI',Arial,sans-serif",family:font?.fontFamily||"'Segoe UI',Arial,sans-serif",size:parseFloat(font?.fontSize)||14,lineHeight:parseFloat(font?.lineHeight)||17.5};
+}
+function printNoteLines(text,reference){
+ const probe=document.createElement('div');
+ Object.assign(probe.style,{position:'fixed',left:'-10000px',top:'0',visibility:'hidden',width:reference.width+'px',font:reference.font,whiteSpace:'pre-wrap',overflowWrap:'anywhere',margin:'0',padding:'0',border:'0'});
+ probe.textContent=text;document.body.append(probe);
+ try{
+  const range=document.createRange(),node=probe.firstChild,rows=[];
+  if(!node)return rows;
+  let offset=0,top=null,line='';
+  for(const char of text){
+   if(char==='\n'){
+    rows.push(line);line='';top=null;offset++;continue;
+   }
+   range.setStart(node,offset);offset+=char.length;range.setEnd(node,offset);
+   const y=range.getBoundingClientRect().top;
+   if(top!==null&&Math.abs(y-top)>1){
+    rows.push(line);line='';
+   }
+   top=y;line+=char;
+  }
+  return [...rows,line];
+ }finally{probe.remove();}
+}
+function printNoteMarkup(text,reference){
+ if(!text.trim())return '<p></p>';
+ const lines=printNoteLines(text.replace(/\r\n?/g,'\n'),reference);
+ const height=Math.max(3,lines.length)*reference.lineHeight;
+ const spans=lines.map((line,index)=>'<text x="0" y="'+(reference.size+(index*reference.lineHeight))+'">'+esc(line)+'</text>').join('');
+ return '<p><svg aria-label="Nota de la secuencia" viewBox="0 0 '+reference.width+' '+height+'" preserveAspectRatio="xMinYMin meet" xml:space="preserve" font-family="'+esc(reference.family)+'" font-size="'+reference.size+'" fill="#0c1d32">'+spans+'</svg></p>';
+}
 function buildPrintDocument(plays,orientation="portrait"){
  const landscape=orientation==="landscape",team=printTeamSettings();
  const hasTeam=!!(team.name.trim()||team.logo);
@@ -1026,7 +1068,8 @@ function buildPrintDocument(plays,orientation="portrait"){
    const notesHeight=steps.some(st=>st.notes?.trim())?'12mm':'0mm';
    const fillPage=!landscape&&!p.full&&rows>1;
    const notesClass=notesHeight==='0mm'?'':' has-notes';
-   const cells=steps.map(st=>'<section class="print-sequence"><div class="print-diagram"><div class="print-court-title">'+esc(courtTitle(p,st))+'</div><div class="print-court"><svg viewBox="'+[t.left,t.top,t.width,t.height].join(' ')+'" preserveAspectRatio="xMidYMid meet">'+sceneSVG(st,p.full)+'</svg></div></div>'+(notesClass?'<p>'+esc(st.notes||'')+'</p>':'')+'</section>').join('');
+   const noteReference=notesClass?printNoteReference(p,offset,columns,rows):null;
+   const cells=steps.map(st=>'<section class="print-sequence"><div class="print-diagram"><div class="print-court-title">'+esc(courtTitle(p,st))+'</div><div class="print-court"><svg viewBox="'+[t.left,t.top,t.width,t.height].join(' ')+'" preserveAspectRatio="xMidYMid meet">'+sceneSVG(st,p.full)+'</svg></div></div>'+(noteReference?printNoteMarkup(String(st.notes||''),noteReference):'')+'</section>').join('');
    const title=[folder?.name,p.name].filter(Boolean).join(' · ');
    chunks.push('<article class="print-page"><header>'+teamHeading+'<div class="print-play-title">'+esc(title)+'</div></header><div class="print-grid'+notesClass+(fillPage?' fill-page':'')+'" style="--columns:'+columns+';--rows:'+rows+';--court-ratio:'+t.width/t.height+';--notes-height:'+notesHeight+'">'+cells+'</div></article>');
   }
@@ -1051,7 +1094,7 @@ body{font:12px Arial,sans-serif;color:#0c1d32;margin:0;background:#fff}
 .fill-page .print-sequence:nth-child(n+3) .print-court-title{height:8.5mm}
 .print-court{min-height:0;flex:0 0 auto;display:grid;place-items:center}
 .print-court svg{display:block;width:100%;height:auto;max-height:100%}
-.print-sequence p{height:var(--notes-height);flex:none;margin:0;padding:0.5mm 1mm;font-size:11px;line-height:3.5mm;text-align:left;white-space:pre-wrap;overflow-wrap:anywhere;overflow:hidden}
+.print-sequence p{height:var(--notes-height);flex:none;margin:0;padding:0.5mm 1mm;overflow:hidden}.print-sequence p svg{width:100%;height:100%;display:block}
 button{padding:12px;background:#007AAD;color:white;border:0;cursor:pointer;margin:10px}
 @media print{button{display:none}}
 @media screen{body{background:#D9E2E9;padding:16px}.print-page{--preview-inset:10mm;margin:0 auto 20px;background:white;box-shadow:0 2px 14px #0C1D3233;padding:5mm}}
