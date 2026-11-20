@@ -1097,17 +1097,16 @@ body{font:12px Arial,sans-serif;color:#0c1d32;margin:0;background:#fff}
  --cell-width:min(var(--column-width),calc(var(--court-height)*var(--court-ratio)));
  --grid-footprint:calc(var(--rows)*(var(--cell-width)/var(--court-ratio) + var(--notes-height)) + var(--court-title-height) + (var(--rows) - 1)*(var(--lower-title-height) + var(--row-gap)));
  --first-title-top:calc(var(--preview-inset)/2 + var(--header-height) + (var(--grid-height) - var(--grid-footprint))/2 + var(--court-title-height) - var(--court-title-line) - var(--court-title-padding) + 1mm);
- /* Measure the gap against the distance from the paper edge to the first court title. */
- --title-gap-ratio:0.22;
- --heading-bottom:calc((var(--page-top-margin) + var(--first-title-top))*(1 - var(--title-gap-ratio)) - var(--page-top-margin) + 1mm);
+ /* Center the main title between the paper edge and the first court title. */
+ --heading-center:calc((var(--first-title-top) - var(--page-top-margin))/2);
  position:relative;width:var(--page-width);height:var(--page-height);display:flex;flex-direction:column;break-after:page;overflow:hidden
 }
 .print-page.compact-grid{--row-gap:0.6mm;--lower-title-height:8.5mm;--row-height:min(123mm,calc((var(--grid-height) - (var(--rows) - 1)*var(--row-gap))/var(--rows)))}
 .print-page:last-child{break-after:auto}
 .print-page>header{flex:0 0 var(--header-height);text-align:center}
-.print-heading{position:absolute;inset-inline:0;top:var(--heading-bottom);transform:translateY(-100%)}
+.print-heading{position:absolute;inset-inline:0;top:var(--heading-center);transform:translateY(-50%)}
 .print-play-title{padding:0 4mm;font-size:27px;font-weight:700;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.print-team{display:flex;justify-content:center;align-items:center;gap:2mm;height:13mm;margin-bottom:1mm;font-size:15px;font-weight:bold}
+.print-team{position:absolute;inset-inline:0;bottom:100%;display:flex;justify-content:center;align-items:center;gap:2mm;height:13mm;margin-bottom:1mm;font-size:15px;font-weight:bold}
 .print-team img{width:12mm;height:12mm;object-fit:contain}
 .print-team span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .print-grid{display:grid;grid-template-columns:repeat(var(--columns),minmax(0,var(--cell-width)));justify-content:center;gap:var(--row-gap) var(--gap);margin-block:auto}
