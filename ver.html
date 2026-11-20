@@ -39,15 +39,6 @@ button:disabled{opacity:.45}
 #play-picker{display:block;margin:0 0 1rem}
 #play-picker[hidden]{display:none}
 #play-choice{display:block;width:100%;margin-top:.3rem;padding:.65rem;border:1px solid #a7b9c8;border-radius:.4rem;background:#fff;color:inherit;font:inherit}
-
-:root{color-scheme:dark;--matte-window:#181818;--matte-panel:#242424;--matte-control:#303030;--matte-line:#494949;--matte-text:#e8e8e8;--matte-muted:#b9b9b9;--matte-blue:#88aff4}
-body,.sequence-stage:fullscreen{background:var(--matte-window);color:var(--matte-text)}
-header p{color:var(--matte-muted)}
-figure{background:var(--matte-panel);border-color:var(--matte-line)}
-figure img,figure svg{background:#fff}
-#play-choice,.sequence-controls,.sequence-controls select option{background:var(--matte-control);color:var(--matte-text);border-color:var(--matte-line)}
-.sequence-controls input[type=range]{accent-color:var(--matte-blue)}
-.sequence-controls :is(button,select):hover,.sequence-controls :is(button,select):focus-visible{border-color:var(--matte-blue)}
 </style>
 <main>
  <header><p>Design Play · Solo lectura</p><h1 id="title">Jugada compartida</h1></header>
@@ -60,7 +51,7 @@ figure img,figure svg{background:#fff}
  </section>
 </main>
 <script src="./court-svg.js?v=104"></script>
-<script src="./sequence-playback.js?v=126"></script>
+<script src="./sequence-playback.js?v=96"></script>
 <script>
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const byId=id=>document.getElementById(id);
@@ -118,7 +109,6 @@ async function showSharedPlay(){
    court.src=imageUrl;
   }
   const playback=createSequencePlayback({previous:byId('previous'),next:byId('next'),toggle:byId('toggle'),speed:byId('speed'),position:byId('position'),progress:byId('progress'),clock:byId('clock'),fullscreen:byId('fullscreen'),fullscreenTarget:byId('play'),render});
-  document.addEventListener('keydown',playback.handleSpace);
   function loadPlay(play){
    const frames=play.steps.map(step=>{
     if(!Array.isArray(step.elements))return step;

@@ -1,8 +1,3 @@
-function isPlaybackSpace(event){
- return event.key===' '&&!event.defaultPrevented&&!event.isComposing&&
-  !event.ctrlKey&&!event.metaKey&&!event.altKey&&!event.shiftKey&&
-  !event.target.isContentEditable&&!event.target.closest?.('input:not([type=range]),textarea,select');
-}
 function createSequencePlayback({previous,next,toggle,speed,position,progress,clock,fullscreen,fullscreenTarget,render}){
  let steps=[],starts=[],total=0,index=-1,frame=null,lastTime=null,elapsed=0,timeline;
  const durationOf=step=>step.motion?.duration??1500;
@@ -13,7 +8,7 @@ function createSequencePlayback({previous,next,toggle,speed,position,progress,cl
   const label=frame!==null?'Pausar':total&&elapsed===total?'Repetir':'Reproducir';
   toggle.textContent=frame!==null?'❚❚':'▶';
   toggle.setAttribute('aria-label',label);
-  toggle.title=label+' (Espacio)';
+  toggle.title=label;
   position.textContent=index<0?'':(index+1)+' de '+steps.length;
  }
  function timeLabel(ms){
@@ -54,17 +49,7 @@ function createSequencePlayback({previous,next,toggle,speed,position,progress,cl
   const target=index+delta;
   if(target>=0&&target<steps.length){lastTime=null;seek(starts[target]);}
  }
- function togglePlayback(){
-  if(frame===null)start();else stop();
- }
- toggle.onclick=togglePlayback;
- toggle.setAttribute('aria-keyshortcuts','Space');
- function handleSpace(event){
-  if(!isPlaybackSpace(event)||toggle.disabled)return false;
-  event.preventDefault();
-  if(!event.repeat)togglePlayback();
-  return true;
- }
+ toggle.onclick=()=>frame===null?start():stop();
  previous.onclick=()=>move(-1);
  next.onclick=()=>move(1);
  progress.oninput=()=>{
@@ -92,8 +77,7 @@ function createSequencePlayback({previous,next,toggle,speed,position,progress,cl
    seek(0);updateControls();if(autoplay)start();
   },
   stop,
-  move,
-  handleSpace
+  move
  };
 }
 
